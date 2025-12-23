@@ -1,0 +1,3 @@
+# Proxy API requests to the backend
+# Replace https://shelfswap-backend-PLACEHOLDER.a.run.app with your actual Cloud Run URL
+/api/*  https://shelfswap-backend-PLACEHOLDER.a.run.app/:splat  200
