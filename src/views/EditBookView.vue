@@ -15,6 +15,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import BookForm from '../components/BookForm.vue'
+import API_BASE_URL from '../config/api'
 
 const route = useRoute()
 const book = ref(null)
@@ -23,7 +24,7 @@ const error = ref('')
 
 onMounted(async () => {
     try {
-        const res = await fetch(`/api/books/${route.params.id}`)
+        const res = await fetch(`${API_BASE_URL}/books/${route.params.id}`)
         if (!res.ok) {
             throw new Error('Failed to fetch book')
         }

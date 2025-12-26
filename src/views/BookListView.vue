@@ -104,40 +104,13 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import API_BASE_URL from '../config/api'
 
 const route = useRoute()
 const books = ref([])
-const loading = ref(false)
-const error = ref('')
-const searchQuery = ref('')
-const sortOrder = ref('newest')
-const limit = ref(9)
-const offset = ref(0)
-const hasMore = ref(true)
-
-const formatDate = (dateString) => {
-    if (!dateString) return ''
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    }) + '; ' + date.toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit'
-    })
-}
-
-let debounceTimeout = null
-
+// ... (omitted lines)
 const fetchBooks = async (reset = false) => {
-    if (reset) {
-        offset.value = 0
-        books.value = []
-        hasMore.value = true
-    }
-
+    // ... (omitted lines)
     if (loading.value && !reset) return // Don't fetch if already loading, unless resetting
 
     loading.value = true
@@ -151,7 +124,7 @@ const fetchBooks = async (reset = false) => {
             offset: offset.value.toString(),
             genre: genre // Add genre to query params
         })
-        const res = await fetch(`/api/books?${queryParams}`)
+        const res = await fetch(`${API_BASE_URL}/books?${queryParams}`)
         if (!res.ok) throw new Error('Failed to fetch books')
         const newBooks = await res.json() || []
 
