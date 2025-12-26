@@ -8,7 +8,7 @@ const lastFetchTime = ref(0)
 const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
 
 export const useAuth = () => {
-    const { isSignedIn, signOut } = useClerkAuth()
+    const { isSignedIn, signOut, getToken } = useClerkAuth()
     const { user: clerkUser } = useClerkUser()
 
     // Fetch local user data from backend when Clerk user is available
@@ -23,7 +23,12 @@ export const useAuth = () => {
 
         fetchingUser.value = true
         try {
-            const res = await fetch(`${API_BASE_URL}/me`)
+            const token = await getToken()
+            const res = await fetch(`${API_BASE_URL}/me`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
             if (res.ok) {
                 localUser.value = await res.json()
                 lastFetchTime.value = now
