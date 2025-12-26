@@ -27,6 +27,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import API_BASE_URL from '../config/api'
 
 const genres = ref([])
 const loading = ref(true)
@@ -34,7 +35,7 @@ const error = ref('')
 
 onMounted(async () => {
     try {
-        const res = await fetch('/api/genres/popular')
+        const res = await fetch(`${API_BASE_URL}/genres/popular`)
         if (!res.ok) throw new Error('Failed to fetch genres')
         genres.value = await res.json()
     } catch (e) {

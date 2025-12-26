@@ -28,6 +28,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import API_BASE_URL from '../config/api'
 
 const genres = ref([])
 const loading = ref(true)
@@ -37,7 +38,7 @@ const route = useRoute()
 const fetchGenres = async () => {
     loading.value = true
     try {
-        const res = await fetch('/api/genres')
+        const res = await fetch(`${API_BASE_URL}/genres`)
         if (!res.ok) throw new Error('Failed to fetch genres')
         genres.value = await res.json()
     } catch (e) {

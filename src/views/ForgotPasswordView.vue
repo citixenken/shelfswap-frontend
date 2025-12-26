@@ -45,6 +45,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import API_BASE_URL from '../config/api'
 
 const email = ref('')
 const loading = ref(false)
@@ -57,7 +58,7 @@ const handleSubmit = async () => {
     error.value = ''
 
     try {
-        const res = await fetch('/api/forgot-password', {
+        const res = await fetch(`${API_BASE_URL}/forgot-password`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: email.value })

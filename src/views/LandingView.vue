@@ -75,7 +75,7 @@
         <div class="fade-in-up delay-1000 mt-16 grid grid-cols-3 gap-8 max-w-2xl mx-auto text-center">
             <div>
                 <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400 counter">{{ animatedStats.totalBooks
-                    }}+</div>
+                }}+</div>
                 <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Books Shared</div>
             </div>
             <div>
@@ -96,6 +96,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useAuth } from '@clerk/vue'
+import API_BASE_URL from '../config/api'
 
 const { isSignedIn } = useAuth()
 
@@ -132,7 +133,7 @@ const animateCounter = (key, target) => {
 
 onMounted(async () => {
     try {
-        const res = await fetch('/api/stats')
+        const res = await fetch(`${API_BASE_URL}/stats`)
         if (res.ok) {
             const data = await res.json()
             // Map snake_case API response to camelCase

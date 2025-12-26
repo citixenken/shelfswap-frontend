@@ -67,6 +67,7 @@
 <script setup>
 import { ref, defineProps, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import API_BASE_URL from '../config/api'
 
 const props = defineProps({
     initialBook: {
@@ -127,7 +128,7 @@ const uploadImage = async () => {
     formData.append('image', selectedFile.value)
 
     try {
-        const res = await fetch('/api/upload', {
+        const res = await fetch(`${API_BASE_URL}/upload`, {
             method: 'POST',
             body: formData
         })
@@ -163,7 +164,7 @@ const submitBook = async () => {
             genre: genre.value,
             image_path: uploadedPath
         }
-        const url = props.isEdit ? `/api/books/${props.initialBook.id}` : '/api/books'
+        const url = props.isEdit ? `${API_BASE_URL}/books/${props.initialBook.id}` : `${API_BASE_URL}/books`
         const method = props.isEdit ? 'PUT' : 'POST'
 
         const response = await fetch(url, {

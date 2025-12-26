@@ -99,6 +99,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useAuth } from '../stores/auth'
+import API_BASE_URL from '../config/api'
 
 const books = ref([])
 const loading = ref(true)
@@ -123,7 +124,7 @@ const formatDate = (dateString) => {
 
 const fetchUserBooks = async () => {
     try {
-        const res = await fetch('/api/my-books')
+        const res = await fetch(`${API_BASE_URL}/my-books`)
         if (!res.ok) {
             throw new Error('Failed to fetch your books')
         }

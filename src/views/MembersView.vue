@@ -57,6 +57,7 @@
 import { useAuth } from '../stores/auth'
 import { useRoute } from 'vue-router'
 import { onMounted, ref, watch } from 'vue'
+import API_BASE_URL from '../config/api'
 
 const members = ref([])
 const loading = ref(true)
@@ -67,7 +68,7 @@ const route = useRoute()
 const fetchMembers = async () => {
     loading.value = true
     try {
-        const res = await fetch('/api/members')
+        const res = await fetch(`${API_BASE_URL}/members`)
         if (!res.ok) throw new Error('Failed to fetch members')
         const allMembers = await res.json()
         members.value = allMembers.filter(m => m.id !== user.value?.id)

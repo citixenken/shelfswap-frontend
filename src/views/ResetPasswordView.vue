@@ -60,6 +60,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import API_BASE_URL from '../config/api'
 
 const route = useRoute()
 const password = ref('')
@@ -88,7 +89,7 @@ const handleSubmit = async () => {
     error.value = ''
 
     try {
-        const res = await fetch('/api/reset-password', {
+        const res = await fetch(`${API_BASE_URL}/reset-password`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

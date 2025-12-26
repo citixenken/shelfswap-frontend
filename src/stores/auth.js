@@ -1,5 +1,6 @@
 import { ref, computed, watchEffect } from 'vue'
 import { useAuth as useClerkAuth, useUser as useClerkUser } from '@clerk/vue'
+import API_BASE_URL from '../config/api'
 
 const localUser = ref(null)
 const fetchingUser = ref(false)
@@ -22,7 +23,7 @@ export const useAuth = () => {
 
         fetchingUser.value = true
         try {
-            const res = await fetch('/api/me')
+            const res = await fetch(`${API_BASE_URL}/me`)
             if (res.ok) {
                 localUser.value = await res.json()
                 lastFetchTime.value = now

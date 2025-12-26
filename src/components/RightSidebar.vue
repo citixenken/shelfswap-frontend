@@ -57,6 +57,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import API_BASE_URL from '../config/api'
 
 const topBooks = ref([])
 const popularGenres = ref([])
@@ -70,7 +71,7 @@ const route = useRoute()
 const fetchTopBooks = async () => {
     loadingTopBooks.value = true
     try {
-        const res = await fetch('/api/books/top-requested?limit=5')
+        const res = await fetch(`${API_BASE_URL}/books/top-requested?limit=5`)
         if (res.ok) {
             topBooks.value = await res.json()
         }
@@ -84,7 +85,7 @@ const fetchTopBooks = async () => {
 const fetchPopularGenres = async () => {
     loadingGenres.value = true
     try {
-        const res = await fetch('/api/genres/popular')
+        const res = await fetch(`${API_BASE_URL}/genres/popular`)
         if (res.ok) {
             popularGenres.value = await res.json()
         }

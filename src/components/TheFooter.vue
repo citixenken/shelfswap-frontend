@@ -20,12 +20,13 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import API_BASE_URL from '../config/api'
 
 const status = ref('Checking...')
 
 onMounted(async () => {
     try {
-        const res = await fetch('/api/health')
+        const res = await fetch(`${API_BASE_URL}/health`)
         const data = await res.json()
         status.value = data.status
     } catch (e) {

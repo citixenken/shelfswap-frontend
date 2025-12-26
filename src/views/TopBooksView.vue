@@ -38,6 +38,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import API_BASE_URL from '../config/api'
 
 const books = ref([])
 const loading = ref(true)
@@ -47,7 +48,7 @@ const route = useRoute()
 const fetchBooks = async () => {
     loading.value = true
     try {
-        const res = await fetch('/api/books/top-requested?limit=20')
+        const res = await fetch(`${API_BASE_URL}/books/top-requested?limit=20`)
         if (!res.ok) throw new Error('Failed to fetch top books')
         books.value = await res.json()
     } catch (e) {

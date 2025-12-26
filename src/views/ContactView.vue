@@ -46,6 +46,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from '../composables/useToast'
+import API_BASE_URL from '../config/api'
 
 const router = useRouter()
 const { showToast } = useToast()
@@ -60,7 +61,7 @@ const form = ref({
 const submitForm = async () => {
     loading.value = true
     try {
-        const res = await fetch('/api/contact', {
+        const res = await fetch(`${API_BASE_URL}/contact`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

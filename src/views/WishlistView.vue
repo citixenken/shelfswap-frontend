@@ -54,6 +54,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import API_BASE_URL from '../config/api'
 
 const requests = ref([])
 const loading = ref(true)
@@ -63,7 +64,7 @@ const route = useRoute()
 const fetchRequests = async () => {
     loading.value = true
     try {
-        const res = await fetch('/api/wishlist')
+        const res = await fetch(`${API_BASE_URL}/wishlist`)
         if (!res.ok) throw new Error('Failed to fetch wishlist')
         requests.value = await res.json() || []
     } catch (e) {
