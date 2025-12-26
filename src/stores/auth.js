@@ -1,4 +1,4 @@
-import { ref, computed, watchEffect } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useAuth as useClerkAuth, useUser as useClerkUser, useSession } from '@clerk/vue'
 import API_BASE_URL from '../config/api'
 
@@ -14,8 +14,10 @@ export const useAuth = () => {
 
     const getToken = async () => {
         if (session.value) {
-            return await session.value.getToken()
+            const token = await session.value.getToken()
+            return token
         }
+        console.warn('No session found during getToken call')
         return null
     }
 
@@ -49,11 +51,13 @@ export const useAuth = () => {
     }
 
     // Automatically fetch user data when Clerk user becomes available
-    watchEffect(() => {
-        if (clerkUser.value && !localUser.value && !fetchingUser.value) {
+    // Use watch instead of watchEffect to avoid infinite loops if fetch fails
+    watch(() => clerkUser.value, (newUser) => {
+        if (newUser && !localUser.value && !fetchingUser.value) {
+            console.log('Clerk user detected, fetching local profile...')
             fetchLocalUser()
         }
-    })
+    }, { immediate: true })
 
     const user = computed(() => {
         // Use local user data if available (includes local DB ID)
