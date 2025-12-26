@@ -1,5 +1,5 @@
 const API_BASE_URL = import.meta.env.PROD
-  ? 'https://shelfswap-backend-964995091114.us-central1.run.app'
+  ? 'https://shelfswap-backend-bhfvinnciq-uc.a.run.app'
   : '/api';
 
 export default API_BASE_URL;
