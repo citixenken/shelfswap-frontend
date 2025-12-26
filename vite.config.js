@@ -16,5 +16,19 @@ export default defineConfig({
         changeOrigin: true
       }
     }
+  },
+  build: {
+    // Production optimizations
+    minify: 'terser',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor': ['vue', 'vue-router'],
+          'clerk': ['@clerk/vue']
+        }
+      }
+    },
+    chunkSizeWarningLimit: 1000
   }
 })

@@ -1,3 +1,7 @@
 # Proxy API requests to the backend
-# Replace https://shelfswap-backend-PLACEHOLDER.a.run.app with your actual Cloud Run URL
-/api/*  https://shelfswap-backend-PLACEHOLDER.a.run.app/:splat  200
+# IMPORTANT: Replace this URL with your actual Cloud Run URL after deployment
+# Format: https://shelfswap-backend-<hash>-<region>.a.run.app
+/api/*  https://shelfswap-backend-964995091114.us-central1.run.app/:splat  200
+
+# SPA fallback - serve index.html for all non-API routes
+/*  /index.html  200
