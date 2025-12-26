@@ -67,36 +67,83 @@ import { useToast } from '../composables/useToast'
 import API_BASE_URL from '../config/api'
 
 const route = useRoute()
-// ... (omitted lines)
+const router = useRouter()
+const book = ref(null)
+const loading = ref(true)
+const error = ref('')
+const showDeleteModal = ref(false)
+const requesting = ref(false)
+const { user, isAuthenticated } = useAuth()
+const { showToast } = useToast()
+
+const isOwner = computed(() => {
+    return book.value && user.value && book.value.user_id === user.value.id
+})
+
+const formatDate = (dateString) => {
+    if (!dateString) return ''
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    }) + '; ' + date.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit'
+    })
+}
+
 const fetchBook = async () => {
     try {
         const res = await fetch(`${API_BASE_URL}/books/${route.params.id}`)
-        // ... (omitted lines)
-        const confirmDelete = async () => {
-            try {
-                const res = await fetch(`${API_BASE_URL}/books/${book.value.id}`, { method: 'DELETE' })
-                // ... (omitted lines)
-                const requestBook = async () => {
-                    if (book.value.is_requested) return
+        if (!res.ok) {
+            throw new Error('Failed to fetch book details')
+        }
+        book.value = await res.json()
+    } catch (e) {
+        error.value = e.message
+    } finally {
+        loading.value = false
+    }
+}
 
-                    requesting.value = true
-                    try {
-                        const res = await fetch(`${API_BASE_URL}/books/${book.value.id}/request`, {
-                            method: 'POST'
-                        })
-                        if (res.ok) {
-                            showToast('Request sent successfully!', 'success')
-                            book.value.is_requested = true
-                        } else {
-                            const data = await res.json()
-                            showToast(data.error || 'Failed to send request', 'error')
-                        }
-                    } catch (e) {
-                        showToast('Error sending request', 'error')
-                    } finally {
-                        requesting.value = false
-                    }
-                }
+const confirmDelete = async () => {
+    try {
+        const res = await fetch(`${API_BASE_URL}/books/${book.value.id}`, { method: 'DELETE' })
+        if (res.ok) {
+            router.push('/books')
+        } else {
+            alert('Failed to delete book')
+        }
+    } catch (e) {
+        alert('Error deleting book')
+    } finally {
+        showDeleteModal.value = false
+    }
+}
 
-                onMounted(fetchBook)
+const requestBook = async () => {
+    if (book.value.is_requested) return
+
+    requesting.value = true
+    try {
+        const res = await fetch(`${API_BASE_URL}/books/${book.value.id}/request`, {
+            method: 'POST'
+        })
+        if (res.ok) {
+            showToast('Request sent successfully!', 'success')
+            book.value.is_requested = true
+        } else {
+            const data = await res.json()
+            showToast(data.error || 'Failed to send request', 'error')
+        }
+    } catch (e) {
+        showToast('Error sending request', 'error')
+    } finally {
+        requesting.value = false
+    }
+}
+
+onMounted(fetchBook)
 </script>
