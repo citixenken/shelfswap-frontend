@@ -108,9 +108,37 @@ import API_BASE_URL from '../config/api'
 
 const route = useRoute()
 const books = ref([])
-// ... (omitted lines)
+const loading = ref(false)
+const error = ref('')
+const searchQuery = ref('')
+const sortOrder = ref('newest')
+const limit = ref(9)
+const offset = ref(0)
+const hasMore = ref(true)
+
+const formatDate = (dateString) => {
+    if (!dateString) return ''
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    }) + '; ' + date.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit'
+    })
+}
+
+let debounceTimeout = null
+
 const fetchBooks = async (reset = false) => {
-    // ... (omitted lines)
+    if (reset) {
+        offset.value = 0
+        books.value = []
+        hasMore.value = true
+    }
+
     if (loading.value && !reset) return // Don't fetch if already loading, unless resetting
 
     loading.value = true
