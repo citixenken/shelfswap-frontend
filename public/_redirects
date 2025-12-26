@@ -1,3 +1,4 @@
+/api/*  https://shelfswap-backend-964995091114.us-central1.run.app/:splat  200
 # SPA fallback - serve index.html for all routes
 # Note: API calls should go directly to backend URL
 /*  /index.html  200
