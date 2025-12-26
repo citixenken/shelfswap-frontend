@@ -1,6 +1,5 @@
-[build]
-  command = "npm install && npm run build"
-  publish = "dist"
+name = "shelfswap"
+pages_build_output_dir = "dist"
 
 [build.environment]
   NODE_VERSION = "18"
