@@ -53,6 +53,7 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
+import { useAuth } from '../stores/auth'
 import { useRoute } from 'vue-router'
 import API_BASE_URL from '../config/api'
 
@@ -60,13 +61,20 @@ const requests = ref([])
 const loading = ref(true)
 const error = ref('')
 const route = useRoute()
+const { getToken } = useAuth()
 
 const fetchRequests = async () => {
     loading.value = true
     try {
-        const res = await fetch(`${API_BASE_URL}/wishlist`)
+        const token = await getToken()
+        const res = await fetch(`${API_BASE_URL}/wishlist`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
         if (!res.ok) throw new Error('Failed to fetch wishlist')
-        requests.value = await res.json() || []
+        const data = await res.json()
+        requests.value = data || []
     } catch (e) {
         error.value = e.message
     } finally {

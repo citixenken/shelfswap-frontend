@@ -1,5 +1,5 @@
 import { ref, computed, watchEffect } from 'vue'
-import { useAuth as useClerkAuth, useUser as useClerkUser } from '@clerk/vue'
+import { useAuth as useClerkAuth, useUser as useClerkUser, useSession } from '@clerk/vue'
 import API_BASE_URL from '../config/api'
 
 const localUser = ref(null)
@@ -8,8 +8,16 @@ const lastFetchTime = ref(0)
 const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
 
 export const useAuth = () => {
-    const { isSignedIn, signOut, getToken } = useClerkAuth()
+    const { isSignedIn, signOut } = useClerkAuth()
     const { user: clerkUser } = useClerkUser()
+    const { session } = useSession()
+
+    const getToken = async () => {
+        if (session.value) {
+            return await session.value.getToken()
+        }
+        return null
+    }
 
     // Fetch local user data from backend when Clerk user is available
     const fetchLocalUser = async (force = false) => {
@@ -76,6 +84,7 @@ export const useAuth = () => {
         checkAuth: () => fetchLocalUser(true), // Force refresh when explicitly called
         login: async () => true, // Handled by Clerk UI
         register: async () => true, // Handled by Clerk UI
-        updateProfile: async () => ({ success: false, error: 'Managed by Clerk' })
+        updateProfile: async () => ({ success: false, error: 'Managed by Clerk' }),
+        getToken
     }
 }

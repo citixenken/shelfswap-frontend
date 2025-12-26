@@ -67,6 +67,7 @@
 <script setup>
 import { ref, defineProps, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuth } from '../stores/auth'
 import API_BASE_URL from '../config/api'
 
 const props = defineProps({
@@ -81,6 +82,7 @@ const props = defineProps({
 })
 
 const router = useRouter()
+const { getToken } = useAuth()
 const title = ref('')
 const author = ref('')
 const description = ref('')
@@ -128,8 +130,12 @@ const uploadImage = async () => {
     formData.append('image', selectedFile.value)
 
     try {
+        const token = await getToken()
         const res = await fetch(`${API_BASE_URL}/upload`, {
             method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
             body: formData
         })
         if (!res.ok) throw new Error('Upload failed')
@@ -167,9 +173,13 @@ const submitBook = async () => {
         const url = props.isEdit ? `${API_BASE_URL}/books/${props.initialBook.id}` : `${API_BASE_URL}/books`
         const method = props.isEdit ? 'PUT' : 'POST'
 
+        const token = await getToken()
         const response = await fetch(url, {
             method: method,
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify(bookData)
         })
 

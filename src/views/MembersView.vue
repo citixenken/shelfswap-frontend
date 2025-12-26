@@ -62,13 +62,18 @@ import API_BASE_URL from '../config/api'
 const members = ref([])
 const loading = ref(true)
 const error = ref('')
-const { user } = useAuth()
+const { user, getToken } = useAuth()
 const route = useRoute()
 
 const fetchMembers = async () => {
     loading.value = true
     try {
-        const res = await fetch(`${API_BASE_URL}/members`)
+        const token = await getToken()
+        const res = await fetch(`${API_BASE_URL}/members`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
         if (!res.ok) throw new Error('Failed to fetch members')
         const allMembers = await res.json()
         members.value = allMembers.filter(m => m.id !== user.value?.id)

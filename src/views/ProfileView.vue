@@ -104,7 +104,7 @@ import API_BASE_URL from '../config/api'
 const books = ref([])
 const loading = ref(true)
 const error = ref('')
-const { user } = useAuth()
+const { user, getToken } = useAuth()
 
 const userInitial = computed(() => {
     if (user.value && user.value.email) {
@@ -124,7 +124,12 @@ const formatDate = (dateString) => {
 
 const fetchUserBooks = async () => {
     try {
-        const res = await fetch(`${API_BASE_URL}/my-books`)
+        const token = await getToken()
+        const res = await fetch(`${API_BASE_URL}/my-books`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
         if (!res.ok) {
             throw new Error('Failed to fetch your books')
         }
