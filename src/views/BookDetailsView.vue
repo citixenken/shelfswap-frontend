@@ -22,7 +22,8 @@
                 {{ formatDate(book.created_at) }}
             </p>
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
-                Added by {{ book.user_username || book.user_email || 'ShelfSwap Member' }}
+                <!-- Added by {{ book.user_username || book.user_email || 'ShelfSwap Member' }} -->
+                Added by {{ book }}
             </p>
 
             <div class="flex space-x-4 border-t pt-4">
