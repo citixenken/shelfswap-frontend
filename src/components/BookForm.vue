@@ -20,6 +20,7 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700">Genre</label>
                 <select v-model="genre"
+                        required
                         class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                     <option value="">Select a Genre</option>
                     <option v-for="g in genres"
@@ -30,6 +31,7 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700">Brief synopsis of the book</label>
                 <textarea v-model="description"
+                          required
                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                           rows="3"></textarea>
             </div>
@@ -38,7 +40,10 @@
                 <input type="file"
                        @change="handleFileUpload"
                        accept="image/*"
+                       :required="!isEdit"
                        class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 hover:file:cursor-pointer" />
+                <p v-if="isEdit && imagePath"
+                   class="text-xs text-gray-500 mt-1">Leave empty to keep current image</p>
             </div>
             <button type="submit"
                     :disabled="isSubmitting"
@@ -153,6 +158,21 @@ const submitBook = async () => {
 
     isSubmitting.value = true
     message.value = ''
+
+    // Manual Validation
+    if (!title.value || !author.value || !genre.value || !description.value) {
+        message.value = 'Please fill in all required fields.'
+        isSuccess.value = false
+        isSubmitting.value = false
+        return
+    }
+
+    if (!props.isEdit && !selectedFile.value) {
+        message.value = 'Please upload a cover image.'
+        isSuccess.value = false
+        isSubmitting.value = false
+        return
+    }
 
     try {
         let uploadedPath = imagePath.value
