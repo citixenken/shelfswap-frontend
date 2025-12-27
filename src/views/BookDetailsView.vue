@@ -73,7 +73,7 @@ const loading = ref(true)
 const error = ref('')
 const showDeleteModal = ref(false)
 const requesting = ref(false)
-const { user, isAuthenticated } = useAuth()
+const { user, isAuthenticated, getToken } = useAuth()
 const { showToast } = useToast()
 
 const isOwner = computed(() => {
@@ -110,7 +110,13 @@ const fetchBook = async () => {
 
 const confirmDelete = async () => {
     try {
-        const res = await fetch(`${API_BASE_URL}/books/${book.value.id}`, { method: 'DELETE' })
+        const token = await getToken()
+        const res = await fetch(`${API_BASE_URL}/books/${book.value.id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
         if (res.ok) {
             router.push('/books')
         } else {
@@ -128,8 +134,12 @@ const requestBook = async () => {
 
     requesting.value = true
     try {
+        const token = await getToken()
         const res = await fetch(`${API_BASE_URL}/books/${book.value.id}/request`, {
-            method: 'POST'
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
         })
         if (res.ok) {
             showToast('Request sent successfully!', 'success')
