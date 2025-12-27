@@ -22,8 +22,7 @@
                 {{ formatDate(book.created_at) }}
             </p>
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
-                <!-- Added by {{ book.user_username || book.user_email || 'ShelfSwap Member' }} -->
-                Added by {{ book }}
+                Added by {{ book.user_username || book.user_email || 'ShelfSwap Member' }}
             </p>
 
             <div class="flex space-x-4 border-t pt-4">
@@ -97,7 +96,13 @@ const formatDate = (dateString) => {
 
 const fetchBook = async () => {
     try {
-        const res = await fetch(`${API_BASE_URL}/books/${route.params.id}`)
+        const headers = {}
+        const token = await getToken()
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`
+        }
+
+        const res = await fetch(`${API_BASE_URL}/books/${route.params.id}`, { headers })
         if (!res.ok) {
             throw new Error('Failed to fetch book details')
         }

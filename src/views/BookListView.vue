@@ -106,7 +106,10 @@ import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import API_BASE_URL from '../config/api'
 
+import { useAuth } from '../stores/auth'
+
 const route = useRoute()
+const { getToken } = useAuth()
 const books = ref([])
 const loading = ref(false)
 const error = ref('')
@@ -152,7 +155,14 @@ const fetchBooks = async (reset = false) => {
             offset: offset.value.toString(),
             genre: genre // Add genre to query params
         })
-        const res = await fetch(`${API_BASE_URL}/books?${queryParams}`)
+
+        const headers = {}
+        const token = await getToken()
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`
+        }
+
+        const res = await fetch(`${API_BASE_URL}/books?${queryParams}`, { headers })
         if (!res.ok) throw new Error('Failed to fetch books')
         const newBooks = await res.json() || []
 
