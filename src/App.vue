@@ -3,7 +3,8 @@
     <nav class="bg-white dark:bg-gray-800 shadow transition-colors duration-300 z-40 relative">
       <div class="container mx-auto px-4 py-4 flex justify-between items-center">
         <div class="flex items-center">
-          <button @click="isSidebarOpen = true"
+          <button v-if="showSidebar"
+                  @click="isSidebarOpen = true"
                   class="mr-4 text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 focus:outline-none md:hidden">
             <svg class="w-6 h-6"
                  fill="none"
@@ -21,12 +22,12 @@
         </div>
         <div class="space-x-4 flex items-center">
           <router-link to="/books"
-          class="hidden md:inline-block text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400">List
-          Books</router-link>
+                       class="hidden md:inline-block text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400">List
+            Books</router-link>
           <SignedIn>
             <router-link to="/add"
-            class="hidden md:inline-block text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400">Add
-            Book</router-link>
+                         class="hidden md:inline-block text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400">Add
+              Book</router-link>
             <span class="hidden lg:inline-block text-gray-700 dark:text-gray-300 font-medium">
               {{ greeting }}
             </span>
@@ -34,9 +35,9 @@
           </SignedIn>
           <SignedOut>
             <router-link to="/login"
-            class="text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400">Login</router-link>
+                         class="text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400">Login</router-link>
             <router-link to="/register"
-            class="text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400">Register</router-link>
+                         class="text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400">Register</router-link>
           </SignedOut>
           <ThemeSwitcher />
         </div>
