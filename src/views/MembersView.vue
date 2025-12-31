@@ -25,7 +25,8 @@
                 </div>
                 <div>
                     <h2 class="text-lg font-bold dark:text-white">{{ member.username || 'ShelfSwap Member' }}</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ maskEmail(member.email) }}</p>
+<!--                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ maskEmail(member.email) }}</p>-->
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Joined: {{ formatDate(member?.created_at) }}</p>
                     <p v-if="member.location"
                        class="text-xs text-gray-500 dark:text-gray-500 mt-1">
                         <svg class="w-3 h-3 inline mr-1"
@@ -99,6 +100,15 @@ const maskEmail = (email) => {
     if (local.length <= 2) {
         return `${local.charAt(0)}***@${domain}`
     }
-    return `${local.substring(0, 2)}***@${domain}`
+    return `${local.substring(0, 1)}***@${domain}`
+}
+
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
 }
 </script>
