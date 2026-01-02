@@ -17,10 +17,11 @@
                     <span v-else>{{ userInitial }}</span>
                 </div>
                 <div class="flex-1 text-center md:text-left">
-                    <h1 class="text-2xl font-bold mb-2 dark:text-white">{{ user?.email }}</h1>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                        <span class="font-semibold">Username:</span> {{ user?.username || 'Not set' }}
-                    </p>
+<!--                    <h1 class="text-2xl font-bold mb-2 dark:text-white">{{ user?.email }}</h1>-->
+                    <h1 class="text-2xl font-bold mb-2 dark:text-white">{{ user?.username || 'Not set' }}</h1>
+<!--                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">-->
+<!--                        <span class="font-semibold">Username:</span> {{ user?.username || 'Not set' }}-->
+<!--                    </p>-->
                     <p v-if="user?.bio"
                        class="text-gray-700 dark:text-gray-300 mb-2 italic">{{ user?.bio }}</p>
                     <p v-if="user?.location"

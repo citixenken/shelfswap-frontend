@@ -36,26 +36,26 @@
 
         <!-- Feature highlights with slide-in animation -->
         <div class="fade-in-up delay-600 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-12">
-            <div
+            <router-link to="/add"
                  class="feature-card p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
                 <div class="text-4xl mb-3">📚</div>
                 <h3 class="font-semibold text-lg mb-2 dark:text-white">Share Your Library</h3>
                 <p class="text-sm text-gray-600 dark:text-gray-400">List books you're ready to share with the community
                 </p>
-            </div>
-            <div
+            </router-link>
+            <router-link to="/books"
                  class="feature-card p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
                 <div class="text-4xl mb-3">🔍</div>
                 <h3 class="font-semibold text-lg mb-2 dark:text-white">Discover Stories</h3>
                 <p class="text-sm text-gray-600 dark:text-gray-400">Browse books from readers around the world</p>
-            </div>
-            <div
+            </router-link>
+            <router-link to="/members"
                  class="feature-card p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
                 <div class="text-4xl mb-3">🔄</div>
                 <h3 class="font-semibold text-lg mb-2 dark:text-white">Keep Books Moving</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400">Give stories a second life with fellow book lovers
+                <p class="text-sm text-gray-600 dark:text-gray-400">Give stories a second life with fellow bibliophiles
                 </p>
-            </div>
+            </router-link>
         </div>
 
         <!-- CTA buttons with pulse animation -->
