@@ -164,15 +164,20 @@ const fetchMessages = async (isPoll = false) => {
         })
         if (res.ok) {
             const newMessages = await res.json()
-            // Simple check if new messages arrived to scroll down
-            const shouldScroll = messages.value.length < (newMessages || []).length
             messages.value = newMessages || []
-            if (shouldScroll) scrollToBottom()
         }
     } catch (e) {
         console.error("Failed to fetch messages", e)
     } finally {
-        if (!isPoll) loadingMessages.value = false
+        if (!isPoll) {
+            loadingMessages.value = false
+            // Scroll to bottom after loading is done and DOM is updated
+            nextTick(() => {
+                if (messages.value.length > 0) {
+                    scrollToBottom()
+                }
+            })
+        }
     }
 }
 
