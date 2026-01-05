@@ -148,8 +148,23 @@ const requestBook = async () => {
             }
         })
         if (res.ok) {
-            showToast('Request sent successfully!', 'success')
+            showToast('Request sent successfully! Redirecting to chat...', 'success')
             book.value.is_requested = true
+
+            // Initialize chat
+            try {
+                const convRes = await fetch(`${API_BASE_URL}/conversations`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ other_user_id: book.value.user_id })
+                })
+                if (convRes.ok) {
+                    const { id } = await convRes.json()
+                    router.push({ path: '/chats', query: { id } })
+                }
+            } catch (e) {
+                console.error("Failed to redirect to chat", e)
+            }
         } else {
             const data = await res.json()
             showToast(data.error || 'Failed to send request', 'error')

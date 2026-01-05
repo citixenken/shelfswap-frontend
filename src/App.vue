@@ -26,12 +26,28 @@
             Books</router-link>
           <SignedIn>
             <router-link to="/add"
-                         class="hidden md:inline-block text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400">Add
-              Book</router-link>
+            class="hidden md:inline-block text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400">Add
+            Book</router-link>
             <span class="hidden lg:inline-block text-gray-700 dark:text-gray-300 font-medium">
               {{ greeting }}
             </span>
             <UserButton afterSignOutUrl="/" />
+            <router-link to="/chats"
+                         class="relative text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400">
+              <svg class="w-6 h-6"
+                   fill="none"
+                   stroke="currentColor"
+                   viewBox="0 0 24 24">
+                <path stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
+                </path>
+              </svg>
+              <span v-if="unreadCount > 0"
+                    class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">{{
+                      unreadCount }}</span>
+            </router-link>
           </SignedIn>
           <SignedOut>
             <router-link to="/login"
@@ -47,6 +63,7 @@
     <div class="flex flex-grow relative">
       <Sidebar v-if="showSidebar"
                :isOpen="isSidebarOpen"
+               :unreadCount="unreadCount"
                @close="isSidebarOpen = false" />
 
       <div class="flex-grow w-full">
@@ -64,7 +81,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, onUnmounted } from 'vue'
+import { ref, onMounted, computed, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuth, UserButton, SignedIn, SignedOut } from '@clerk/vue'
 import { useAuth as useLocalAuth } from './stores/auth'
@@ -74,12 +91,15 @@ import ThemeSwitcher from './components/ThemeSwitcher.vue'
 import Sidebar from './components/Sidebar.vue'
 import RightSidebar from './components/RightSidebar.vue'
 import CookieConsent from './components/CookieConsent.vue'
+import API_BASE_URL from './config/api'
 
 const isSidebarOpen = ref(false)
 const { isSignedIn } = useAuth()
-const { checkAuth, user } = useLocalAuth()
+const { checkAuth, user, getToken } = useLocalAuth()
 const router = useRouter()
 const route = useRoute()
+const unreadCount = ref(0)
+let notificationInterval
 
 const showSidebar = computed(() => {
   return !['/', '/login', '/register'].includes(route.path)
@@ -98,15 +118,97 @@ const greeting = computed(() => {
   }
 })
 
+
+const fetchUnreadCount = async () => {
+  if (!isSignedIn.value) {
+    console.log('[Notifications] User not signed in, skipping fetch')
+    return
+  }
+  try {
+    const token = await getToken()
+    console.log('[Notifications] Fetching unread count...')
+    const res = await fetch(`${API_BASE_URL}/notifications`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+    console.log('[Notifications] Response status:', res.status)
+    if (res.ok) {
+      const data = await res.json()
+      console.log('[Notifications] Unread count:', data.count)
+      unreadCount.value = data.count
+    } else {
+      console.error('[Notifications] Failed to fetch:', res.status, await res.text())
+    }
+  } catch (e) {
+    console.error('[Notifications] Error fetching unread count:', e)
+  }
+}
+
 const dropdownRef = ref(null)
 
-// Fetch local user data when app mounts
-onMounted(() => {
-  if (isSignedIn.value) {
-    checkAuth()
+// SSE connection management
+let eventSource = null
+
+const connectSSE = async () => {
+  if (!isSignedIn.value) return
+
+  try {
+    const token = await getToken()
+    // Note: EventSource doesn't support custom headers, so we pass token as query param
+    const url = `${API_BASE_URL}/notifications/stream?token=${encodeURIComponent(token)}`
+
+    eventSource = new EventSource(url)
+
+    eventSource.addEventListener('unread-count', (event) => {
+      try {
+        const data = JSON.parse(event.data)
+        unreadCount.value = data.count
+      } catch (e) {
+        console.error('[SSE] Failed to parse event data:', e)
+      }
+    })
+
+    eventSource.onerror = (error) => {
+      console.error('[SSE] Connection error:', error)
+      eventSource.close()
+      // Retry connection after 5 seconds
+      setTimeout(() => {
+        if (isSignedIn.value) {
+          connectSSE()
+        }
+      }, 5000)
+    }
+
+    eventSource.onopen = () => {
+      console.log('[SSE] Connection established')
+    }
+  } catch (e) {
+    console.error('[SSE] Failed to connect:', e)
   }
+}
+
+const disconnectSSE = () => {
+  if (eventSource) {
+    eventSource.close()
+    eventSource = null
+  }
+}
+
+// Fetch local user data when app mounts
+// Watch for auth state changes to start/stop SSE
+watch(isSignedIn, (newVal) => {
+  console.log('[Notifications] Auth state changed:', newVal)
+  if (newVal) {
+    checkAuth()
+    connectSSE()
+  } else {
+    disconnectSSE()
+    unreadCount.value = 0
+  }
+}, { immediate: true })
+
+onUnmounted(() => {
+  disconnectSSE()
 })
-// Dropdown logic removed as UserButton handles it
 </script>
 
 <style>

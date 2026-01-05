@@ -16,6 +16,12 @@ const routes = [
     component: LandingView
   },
   {
+    path: '/chats',
+    name: 'Chats',
+    component: () => import('../views/ChatView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/books',
     name: 'BookList',
     component: BookListView

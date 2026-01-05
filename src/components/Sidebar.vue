@@ -26,6 +26,11 @@
                          class="block px-4 py-2 text-gray-700 hover:bg-blue-100 dark:text-gray-300 dark:hover:bg-blue-900">
                 My Profile
             </router-link>
+            <router-link to="/chats"
+                         @click="$emit('close')"
+                         class="block px-4 py-2 text-gray-700 hover:bg-blue-100 dark:text-gray-300 dark:hover:bg-blue-900">
+                My Chats
+            </router-link>
             <router-link to="/members"
                          @click="$emit('close')"
                          class="block px-4 py-2 text-gray-700 hover:bg-blue-100 dark:text-gray-300 dark:hover:bg-blue-900">
