@@ -12,7 +12,7 @@
                  class="mb-4">
                 <img :src="book.image_path"
                      alt="Book Cover"
-                     class="w-full max-h-96 object-contain rounded" />
+                     class="w-full object-contain rounded-lg" />
             </div>
             <div class="prose max-w-none mb-2 dark:text-gray-300">
                 <p class="whitespace-pre-wrap">{{ book.description }}</p>
