@@ -2,7 +2,7 @@
     <div class="container mx-auto p-4 max-w-3xl">
         <h1 class="text-3xl font-bold mb-6 dark:text-white">Privacy Policy</h1>
         <div class="prose dark:prose-invert max-w-none">
-            <p class="dark:text-gray-300">At ShelfSwap, accessible from shelfswap.com, one of our main priorities is the
+            <p class="dark:text-gray-300">At ShelfSwap, accessible from shelfswap.io, one of our main priorities is the
                 privacy of our visitors.
                 This Privacy Policy document contains types of information that is collected and recorded by ShelfSwap
                 and how we use it.</p>
