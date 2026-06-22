@@ -14,9 +14,8 @@
                     <router-link :to="`/books/${book.book_id}`"
                                  class="flex items-start space-x-3 group">
                         <div class="w-10 h-14 bg-gray-200 dark:bg-gray-700 flex-shrink-0 rounded overflow-hidden">
-                            <img v-if="book.image_path"
-                                 :src="book.image_path"
-                                 class="w-full h-full object-cover">
+                            <AppImage :src="book.image_path"
+                                      alt="Book Cover" />
                         </div>
                         <div>
                             <p
@@ -58,6 +57,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import API_BASE_URL from '../config/api'
+import AppImage from '../components/AppImage.vue'
 
 const topBooks = ref([])
 const popularGenres = ref([])

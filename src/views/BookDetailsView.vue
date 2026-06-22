@@ -9,10 +9,12 @@
             <h1 class="text-3xl font-bold mb-2 dark:text-white">{{ book.title }}</h1>
             <p class="text-xl text-gray-700 dark:text-gray-300 mb-4">by {{ book.author }}</p>
             <div v-if="book.image_path"
-                 class="mb-4">
-                <img :src="book.image_path"
-                     alt="Book Cover"
-                     class="w-full object-contain rounded-lg" />
+                 class="mb-4 flex justify-center">
+                <AppImage :src="book.image_path"
+                          alt="Book Cover"
+                          img-class="object-contain"
+                          wrapper-class="w-full max-w-xs aspect-[2/3] rounded-lg bg-gray-100 dark:bg-gray-700"
+                          eager />
             </div>
             <div class="prose max-w-none mb-2 dark:text-gray-300">
                 <p class="whitespace-pre-wrap">{{ book.description }}</p>
@@ -62,6 +64,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ConfirmModal from '../components/ConfirmModal.vue'
+import AppImage from '../components/AppImage.vue'
 import { useAuth } from '../stores/auth'
 import { useToast } from '../composables/useToast'
 import API_BASE_URL from '../config/api'

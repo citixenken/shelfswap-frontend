@@ -44,14 +44,14 @@
                  class="bg-white dark:bg-gray-800 p-6 rounded shadow flex items-center space-x-4">
                 <div
                      class="w-16 h-16 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 flex-shrink-0 flex items-center justify-center">
-                    <img v-if="member.avatar_path"
-                         :src="member.avatar_path"
-                         alt="Avatar"
-                         class="w-full h-full object-cover">
-                    <span v-else
-                          class="text-2xl font-bold text-gray-500 dark:text-gray-300">
-                        {{ (member.username || member.email || 'U').charAt(0).toUpperCase() }}
-                    </span>
+                    <AppImage :src="member.avatar_path"
+                              alt="Avatar">
+                        <template #fallback>
+                            <span class="text-2xl font-bold text-gray-500 dark:text-gray-300">
+                                {{ (member.username || member.email || 'U').charAt(0).toUpperCase() }}
+                            </span>
+                        </template>
+                    </AppImage>
                 </div>
                 <div>
                     <h2 class="text-lg font-bold dark:text-white">{{ member.username || 'ShelfSwap Member' }}</h2>
@@ -89,6 +89,7 @@ import { useAuth } from '../stores/auth'
 import { useRoute } from 'vue-router'
 import { onMounted, ref, watch, computed } from 'vue'
 import API_BASE_URL from '../config/api'
+import AppImage from '../components/AppImage.vue'
 
 const members = ref([])
 const loading = ref(true)

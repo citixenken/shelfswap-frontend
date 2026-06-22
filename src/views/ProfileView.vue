@@ -10,11 +10,12 @@
                  class="bg-white dark:bg-gray-800 p-6 rounded shadow-md mb-6 flex flex-col md:flex-row items-center gap-6">
                 <div
                      class="w-24 h-24 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-300 text-3xl font-bold">
-                    <img v-if="user?.avatar_path"
-                         :src="user.avatar_path"
-                         alt="Avatar"
-                         class="w-full h-full object-cover">
-                    <span v-else>{{ userInitial }}</span>
+                    <AppImage :src="user?.avatar_path"
+                              alt="Avatar">
+                        <template #fallback>
+                            <span>{{ userInitial }}</span>
+                        </template>
+                    </AppImage>
                 </div>
                 <div class="flex-1 text-center md:text-left">
 <!--                    <h1 class="text-2xl font-bold mb-2 dark:text-white">{{ user?.email }}</h1>-->
@@ -58,24 +59,8 @@
                              class="p-4 border rounded shadow bg-white dark:bg-gray-800 dark:border-gray-700 flex flex-col justify-between hover:shadow-lg transition-shadow cursor-pointer">
                     <div class="flex gap-4">
                         <div class="w-20 h-28 bg-gray-200 dark:bg-gray-700 flex-shrink-0 rounded overflow-hidden">
-                            <img v-if="book.image_path"
-                                 :src="book.image_path"
-                                 alt="Book Cover"
-                                 class="w-full h-full object-cover">
-                            <div v-else
-                                 class="w-full h-full flex items-center justify-center text-gray-400">
-                                <svg class="w-6 h-6"
-                                     fill="none"
-                                     stroke="currentColor"
-                                     viewBox="0 0 24 24"
-                                     xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round"
-                                          stroke-linejoin="round"
-                                          stroke-width="2"
-                                          d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
-                                    </path>
-                                </svg>
-                            </div>
+                            <AppImage :src="book.image_path"
+                                      alt="Book Cover" />
                         </div>
                         <div class="flex-1">
                             <h2 class="text-xl font-semibold dark:text-white line-clamp-2">{{ book.title }}</h2>
@@ -101,6 +86,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useAuth } from '../stores/auth'
 import API_BASE_URL from '../config/api'
+import AppImage from '../components/AppImage.vue'
 
 const books = ref([])
 const loading = ref(true)

@@ -15,9 +15,8 @@
                          class="p-4 border rounded shadow bg-white dark:bg-gray-800 dark:border-gray-700 flex flex-col justify-between hover:shadow-lg transition-shadow cursor-pointer">
                 <div class="flex items-start space-x-4">
                     <div class="w-20 h-28 bg-gray-200 dark:bg-gray-700 flex-shrink-0 rounded overflow-hidden">
-                        <img v-if="book.image_path"
-                             :src="book.image_path"
-                             class="w-full h-full object-cover">
+                        <AppImage :src="book.image_path"
+                                  alt="Book Cover" />
                     </div>
                     <div>
                         <h2 class="text-xl font-semibold dark:text-white line-clamp-2">{{ book.title }}</h2>
@@ -39,6 +38,7 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import API_BASE_URL from '../config/api'
+import AppImage from '../components/AppImage.vue'
 
 const books = ref([])
 const loading = ref(true)
