@@ -1,59 +1,77 @@
 #!/bin/bash
 
 # ShelfSwap Frontend Deployment Script for Cloudflare Pages
-# This script builds and deploys the frontend to Cloudflare Pages using Wrangler
+# Builds and deploys the frontend to Cloudflare Pages using Wrangler.
+#
+# Usage:
+#   ./deploy-frontend.sh         Interactive local deploy (opens browser to log in)
+#   ./deploy-frontend.sh --ci    Non-interactive deploy for CI/CD pipelines
+#
+# CI mode requires these environment variables (set them as CI secrets):
+#   CLOUDFLARE_API_TOKEN          API token with the "Cloudflare Pages: Edit" permission
+#   CLOUDFLARE_ACCOUNT_ID         Your Cloudflare account ID
+#   VITE_CLERK_PUBLISHABLE_KEY    Clerk publishable key, baked into the build
 
-set -e  # Exit on error
+set -euo pipefail
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+# Colors for output (auto-disabled when not attached to a terminal, e.g. CI logs)
+if [ -t 1 ]; then
+    RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; NC='\033[0m'
+else
+    RED=''; GREEN=''; YELLOW=''; NC=''
+fi
+
+PROJECT_NAME="shelfswap"
+OUTPUT_DIR="dist"
+# Pin Wrangler so local and CI deploys use the exact same version.
+WRANGLER="npx --yes wrangler@4"
+
+# Enable CI mode via the --ci flag or a CI=true environment variable.
+CI_MODE=false
+if [ "${1:-}" = "--ci" ] || [ "${CI:-}" = "true" ]; then
+    CI_MODE=true
+fi
 
 echo -e "${GREEN}🚀 ShelfSwap Frontend Deployment${NC}"
 echo "=================================="
 
-# Check if wrangler is installed
-if ! command -v wrangler &> /dev/null; then
-    echo -e "${YELLOW}Wrangler CLI not found. Installing...${NC}"
-    npm install -g wrangler
+# ---------------------------------------------------------------------------
+# Phase 1/3: Authentication
+# ---------------------------------------------------------------------------
+if [ "$CI_MODE" = true ]; then
+    echo -e "${YELLOW}Phase 1/3: Verifying CI credentials...${NC}"
+    missing=""
+    [ -z "${CLOUDFLARE_API_TOKEN:-}" ] && missing="$missing CLOUDFLARE_API_TOKEN"
+    [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ] && missing="$missing CLOUDFLARE_ACCOUNT_ID"
+    [ -z "${VITE_CLERK_PUBLISHABLE_KEY:-}" ] && missing="$missing VITE_CLERK_PUBLISHABLE_KEY"
+    if [ -n "$missing" ]; then
+        echo -e "${RED}Error: missing required environment variable(s):${missing}${NC}"
+        exit 1
+    fi
+    # Wrangler reads CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID from the environment.
+else
+    echo -e "${YELLOW}Phase 1/3: Authenticating with Cloudflare...${NC}"
+    if ! $WRANGLER whoami &> /dev/null; then
+        echo -e "${YELLOW}Not logged in. Opening browser to authenticate...${NC}"
+        $WRANGLER login
+    fi
 fi
 
-# Check if user is authenticated
-if ! wrangler whoami &> /dev/null; then
-    echo -e "${YELLOW}Authenticating with Cloudflare...${NC}"
-    wrangler login
-fi
-
-# Build the frontend
-echo -e "${YELLOW}Building frontend...${NC}"
+# ---------------------------------------------------------------------------
+# Phase 2/3: Build
+# ---------------------------------------------------------------------------
+echo -e "${YELLOW}Phase 2/3: Building frontend...${NC}"
 npm run build
 
-# Deploy to Cloudflare Pages
-echo -e "${YELLOW}Deploying to Cloudflare Pages...${NC}"
+# ---------------------------------------------------------------------------
+# Phase 3/3: Deploy
+# ---------------------------------------------------------------------------
+echo -e "${YELLOW}Phase 3/3: Deploying to Cloudflare Pages...${NC}"
+$WRANGLER pages deploy "$OUTPUT_DIR" \
+    --project-name="$PROJECT_NAME" \
+    --branch=main \
+    --commit-dirty=true
+
 echo ""
-echo -e "${YELLOW}Note: You can deploy using either:${NC}"
-echo "1. Wrangler CLI (automated)"
-echo "2. Cloudflare Pages Dashboard (manual)"
-echo ""
-echo -e "${YELLOW}For Wrangler deployment, run:${NC}"
-echo "  wrangler pages deploy dist --project-name=shelfswap"
-echo ""
-echo -e "${YELLOW}For Dashboard deployment:${NC}"
-echo "1. Go to https://dash.cloudflare.com/"
-echo "2. Navigate to Pages"
-echo "3. Create a new project or select existing"
-echo "4. Upload the 'dist' folder"
-echo ""
-echo -e "${GREEN}✅ Build completed successfully!${NC}"
+echo -e "${GREEN}✅ Deployment complete!${NC}"
 echo "=================================="
-echo -e "Build output: ${GREEN}dist/${NC}"
-echo ""
-echo -e "${YELLOW}⚠️  Important Next Steps:${NC}"
-echo "1. Update public/_redirects with your actual Cloud Run URL"
-echo "2. Set environment variable in Cloudflare Pages:"
-echo "   - VITE_CLERK_PUBLISHABLE_KEY (your Clerk publishable key)"
-echo "3. Deploy the dist folder to Cloudflare Pages"
-echo "4. Test the deployment"
-echo ""
