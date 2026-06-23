@@ -1,10 +1,11 @@
 <template>
     <div
-         class="w-64 bg-white dark:bg-gray-800 border-l dark:border-gray-700 p-4 hidden lg:block h-screen sticky top-0 overflow-y-auto">
+         class="w-64 flex-shrink-0 bg-white dark:bg-gray-800 border-l dark:border-gray-700 p-4 hidden lg:block h-screen sticky top-0 overflow-y-auto">
         <div class="mb-8">
             <h3 class="text-lg font-bold mb-4 dark:text-white">Top Books</h3>
-            <div v-if="loadingTopBooks"
-                 class="text-sm text-gray-500">Loading...</div>
+            <AppLoader v-if="loadingTopBooks"
+                       size="sm"
+                       class="py-2" />
             <div v-else-if="topBooks.length === 0"
                  class="text-sm text-gray-500">No book found</div>
             <ul v-else
@@ -35,8 +36,9 @@
 
         <div>
             <h3 class="text-lg font-bold mb-4 dark:text-white">Popular Genres</h3>
-            <div v-if="loadingGenres"
-                 class="text-sm text-gray-500">Loading...</div>
+            <AppLoader v-if="loadingGenres"
+                       size="sm"
+                       class="py-2" />
             <div v-else-if="popularGenres.length === 0"
                  class="text-sm text-gray-500">No Genre added yet</div>
             <div v-else
@@ -58,6 +60,7 @@
 import { ref, onMounted } from 'vue'
 import API_BASE_URL from '../config/api'
 import AppImage from '../components/AppImage.vue'
+import AppLoader from '../components/AppLoader.vue'
 
 const topBooks = ref([])
 const popularGenres = ref([])

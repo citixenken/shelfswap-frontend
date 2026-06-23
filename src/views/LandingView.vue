@@ -1,5 +1,11 @@
 <template>
-    <div class="min-h-[85vh] flex flex-col items-center justify-center text-center px-4 relative overflow-hidden">
+    <div class="min-h-[85vh] flex flex-col items-center justify-center text-center px-4 relative isolate overflow-hidden">
+        <!-- Library hero background image (self-hosted, Pexels) -->
+        <div class="hero-bg absolute inset-0" :style="{ backgroundImage: `url(${libraryHero})` }" aria-hidden="true">
+        </div>
+        <!-- Readability scrim that blends the photo into the page background -->
+        <div class="hero-scrim absolute inset-0" aria-hidden="true"></div>
+
         <!-- Animated background elements -->
         <div class="absolute inset-0 -z-10 overflow-hidden">
             <div class="floating-book absolute top-20 left-10 text-6xl opacity-10">📚</div>
@@ -10,51 +16,49 @@
 
         <!-- Main heading with fade-in animation -->
         <div class="fade-in-up">
-            <h1 class="text-5xl md:text-7xl font-bold mb-6 dark:text-white leading-tight">
-                Share Books. <br class="hidden md:inline" />
-                <span class="text-gradient typing-animation">Build Community.</span>
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 text-gray-900 dark:text-white leading-tight">
+                Share what you've read. <br class="hidden md:inline" />
+                <span class="text-indigo-600 dark:text-indigo-400">Swap for what's next.</span>
             </h1>
         </div>
 
         <!-- Subheading with delayed fade-in -->
         <p class="fade-in-up delay-200 text-xl md:text-3xl text-gray-600 dark:text-gray-300 mb-10 font-light max-w-3xl">
-            Your next great read is waiting on someone's shelf
+            A community for readers who pass books on instead of letting them gather dust.
         </p>
 
         <!-- Description with staggered fade-in -->
         <div
              class="fade-in-up delay-400 max-w-3xl mx-auto mb-12 text-gray-700 dark:text-gray-400 leading-relaxed text-lg space-y-4">
             <p>
-                That book you loved? Someone else is searching for it right now.
-                That unread novel on your shelf? It could be someone's next obsession.
+                List the books you're ready to part with, browse what other members are
+                offering, and message them directly to set up a swap.
             </p>
             <p class="font-medium text-indigo-600 dark:text-indigo-400">
-                ShelfSwap connects readers everywhere—share your collection, discover new stories, and keep books in
-                circulation.
+                It's a simple way to find your next read and give your old favorites a new home.
             </p>
         </div>
 
         <!-- Feature highlights with slide-in animation -->
         <div class="fade-in-up delay-600 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-12">
             <router-link to="/add"
-                 class="feature-card p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
-                <!-- <div class="text-4xl mb-3">📚</div> -->
-                <h3 class="font-semibold text-lg mb-2 dark:text-white">Share Your Library</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400">List books you're ready to share with the community
-                </p>
+                         class="feature-card p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+                <h3 class="font-semibold text-lg mb-2 dark:text-white">1. List your books</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Add the titles you're ready to swap or lend to the
+                    community.</p>
             </router-link>
             <router-link to="/books"
-                 class="feature-card p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
-                <!-- <div class="text-4xl mb-3">🔍</div> -->
-                <h3 class="font-semibold text-lg mb-2 dark:text-white">Discover Stories</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400">Browse books from readers around the world</p>
+                         class="feature-card p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+                <h3 class="font-semibold text-lg mb-2 dark:text-white">2. Browse the shelves</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">See what other members are offering and request what
+                    you'd like to read.</p>
             </router-link>
             <router-link to="/members"
-                 class="feature-card p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
-                <!-- <div class="text-4xl mb-3">🔄</div> -->
-                <h3 class="font-semibold text-lg mb-2 dark:text-white">Keep Books Moving</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400">Give stories a second life with fellow bibliophiles
-                </p>
+                         class="feature-card p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+                <h3 class="font-semibold text-lg mb-2 dark:text-white">3. Make the swap</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Chat to coordinate the handoff and keep good books
+                    in
+                    circulation.</p>
             </router-link>
         </div>
 
@@ -62,7 +66,7 @@
         <div class="fade-in-up delay-800 flex flex-col sm:flex-row gap-4">
             <router-link to="/books"
                          class="cta-button bg-indigo-600 hover:bg-indigo-700 text-white text-lg font-semibold py-4 px-10 rounded-full shadow-xl transform transition hover:scale-105 duration-200">
-                Explore Books
+                Browse Books
             </router-link>
             <router-link v-if="!isSignedIn"
                          to="/register"
@@ -75,7 +79,7 @@
         <div class="fade-in-up delay-1000 mt-16 grid grid-cols-3 gap-8 max-w-2xl mx-auto text-center">
             <div>
                 <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400 counter">{{ animatedStats.totalBooks
-                }}+</div>
+                    }}+</div>
                 <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Books Shared</div>
             </div>
             <div>
@@ -97,6 +101,7 @@
 import { ref, onMounted, watch } from 'vue'
 import { useAuth } from '@clerk/vue'
 import API_BASE_URL from '../config/api'
+import libraryHero from '../assets/library-hero.jpg'
 
 const { isSignedIn } = useAuth()
 
@@ -157,24 +162,45 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* Gradient text animation */
-.text-gradient {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: gradient-shift 3s ease infinite;
+/* Library hero background image */
+.hero-bg {
+    z-index: -30;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transform: scale(1.02);
+    /* slow, subtle ken-burns zoom keeps the hero feeling alive */
+    animation: heroZoom 32s ease-in-out infinite alternate;
 }
 
-@keyframes gradient-shift {
+/* Tinted scrim keeps text readable and fades the photo into the page bg.
+   Light mode fades into papayawhip (#ffefd5); dark mode into gray-900. */
+.hero-scrim {
+    z-index: -20;
+    background: linear-gradient(to bottom,
+            rgba(255, 239, 213, 0.62) 0%,
+            rgba(255, 239, 213, 0.78) 28%,
+            rgba(255, 239, 213, 0.90) 60%,
+            rgba(255, 239, 213, 0.98) 85%,
+            rgba(255, 239, 213, 1) 100%);
+}
 
-    0%,
-    100% {
-        background-position: 0% 50%;
+.dark .hero-scrim {
+    background: linear-gradient(to bottom,
+            rgba(17, 24, 39, 0.55) 0%,
+            rgba(17, 24, 39, 0.74) 28%,
+            rgba(17, 24, 39, 0.90) 60%,
+            rgba(17, 24, 39, 0.98) 85%,
+            rgba(17, 24, 39, 1) 100%);
+}
+
+@keyframes heroZoom {
+    from {
+        transform: scale(1.02);
     }
 
-    50% {
-        background-position: 100% 50%;
+    to {
+        transform: scale(1.12);
     }
 }
 
@@ -299,6 +325,14 @@ onMounted(async () => {
 @media (max-width: 768px) {
     .floating-book {
         display: none;
+    }
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .hero-bg {
+        animation: none;
+        transform: none;
     }
 }
 </style>

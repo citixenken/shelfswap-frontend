@@ -27,8 +27,10 @@
             </p>
         </div>
 
-        <div v-if="loading"
-             class="text-center">Loading...</div>
+        <AppLoader v-if="loading"
+                   center
+                   size="lg"
+                   label="Loading members…" />
         <div v-else-if="error"
              class="text-center text-red-600">{{ error }}</div>
 
@@ -90,6 +92,7 @@ import { useRoute } from 'vue-router'
 import { onMounted, ref, watch, computed } from 'vue'
 import API_BASE_URL from '../config/api'
 import AppImage from '../components/AppImage.vue'
+import AppLoader from '../components/AppLoader.vue'
 
 const members = ref([])
 const loading = ref(true)

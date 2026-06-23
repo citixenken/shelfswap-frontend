@@ -1,8 +1,10 @@
 <template>
     <div class="container mx-auto p-4">
         <!-- <h1 class="text-2xl font-bold text-center mb-6">Edit Book</h1> -->
-        <div v-if="loading"
-             class="text-center">Loading...</div>
+        <AppLoader v-if="loading"
+                   center
+                   size="lg"
+                   label="Loading book…" />
         <div v-else-if="error"
              class="text-center text-red-600">{{ error }}</div>
         <BookForm v-else
@@ -16,6 +18,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import BookForm from '../components/BookForm.vue'
 import API_BASE_URL from '../config/api'
+import AppLoader from '../components/AppLoader.vue'
 
 const route = useRoute()
 const book = ref(null)

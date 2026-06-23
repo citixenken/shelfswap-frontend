@@ -2,8 +2,10 @@
     <div class="container mx-auto p-4">
         <h1 class="text-2xl font-bold text-center mb-6 dark:text-white">My Wishlist</h1>
 
-        <div v-if="loading"
-             class="text-center">Loading...</div>
+        <AppLoader v-if="loading"
+                   center
+                   size="lg"
+                   label="Loading wishlist…" />
         <div v-else-if="error"
              class="text-center text-red-600">{{ error }}</div>
 
@@ -41,6 +43,7 @@ import { useAuth } from '../stores/auth'
 import { useRoute } from 'vue-router'
 import API_BASE_URL from '../config/api'
 import AppImage from '../components/AppImage.vue'
+import AppLoader from '../components/AppLoader.vue'
 
 const requests = ref([])
 const loading = ref(true)

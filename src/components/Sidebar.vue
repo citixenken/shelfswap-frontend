@@ -1,7 +1,7 @@
 <template>
     <div :class="[
         'fixed inset-y-0 left-0 z-30 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out',
-        'md:static md:translate-x-0 md:shadow-none md:border-r dark:border-gray-700',
+        'md:static md:translate-x-0 md:shadow-none md:border-r dark:border-gray-700 md:flex-shrink-0',
         isOpen ? 'translate-x-0' : '-translate-x-full'
     ]">
         <div class="flex items-center justify-between p-4 border-b dark:border-gray-700 md:hidden">

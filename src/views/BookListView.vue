@@ -24,8 +24,10 @@
             </div>
         </div>
 
-        <div v-if="loading"
-             class="text-center">Loading...</div>
+        <AppLoader v-if="loading"
+                   center
+                   size="lg"
+                   label="Loading books…" />
         <div v-else-if="error"
              class="text-center text-red-600">{{ error }}</div>
 
@@ -90,6 +92,7 @@ import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import API_BASE_URL from '../config/api'
 import AppImage from '../components/AppImage.vue'
+import AppLoader from '../components/AppLoader.vue'
 
 import { useAuth } from '../stores/auth'
 

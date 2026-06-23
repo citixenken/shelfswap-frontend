@@ -26,8 +26,8 @@
             Books</router-link>
           <SignedIn>
             <router-link to="/add"
-            class="hidden md:inline-block text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400">Add
-            Book</router-link>
+                         class="hidden md:inline-block text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400">Add
+              Book</router-link>
             <span class="hidden lg:inline-block text-gray-700 dark:text-gray-300 font-medium">
               {{ greeting }}
             </span>
@@ -66,7 +66,7 @@
                :unreadCount="unreadCount"
                @close="isSidebarOpen = false" />
 
-      <div class="flex-grow w-full">
+      <div class="flex-grow w-full min-w-0">
 
 
         <router-view :key="$route.fullPath" />

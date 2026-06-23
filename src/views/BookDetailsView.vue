@@ -1,7 +1,9 @@
 <template>
     <div class="container mx-auto p-4">
-        <div v-if="loading"
-             class="text-center">Loading...</div>
+        <AppLoader v-if="loading"
+                   center
+                   size="lg"
+                   label="Loading book…" />
         <div v-else-if="error"
              class="text-center text-red-600">{{ error }}</div>
         <div v-else-if="book"
@@ -13,7 +15,7 @@
                 <AppImage :src="book.image_path"
                           alt="Book Cover"
                           img-class="object-contain"
-                          wrapper-class="w-full max-w-xs aspect-[2/3] rounded-lg bg-gray-100 dark:bg-gray-700"
+                          wrapper-class="w-full max-w-xs aspect-[2/3] rounded-lg dark:bg-gray-700"
                           eager />
             </div>
             <div class="prose max-w-none mb-2 dark:text-gray-300">
@@ -65,6 +67,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ConfirmModal from '../components/ConfirmModal.vue'
 import AppImage from '../components/AppImage.vue'
+import AppLoader from '../components/AppLoader.vue'
 import { useAuth } from '../stores/auth'
 import { useToast } from '../composables/useToast'
 import API_BASE_URL from '../config/api'

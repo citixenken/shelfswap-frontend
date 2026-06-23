@@ -77,8 +77,11 @@
                 <!-- Messages -->
                 <div class="flex-grow overflow-y-auto p-4 space-y-4"
                      ref="messagesContainer">
-                    <div v-if="loadingMessages"
-                         class="text-center text-gray-500 mt-4">Loading messages...</div>
+                    <AppLoader v-if="loadingMessages"
+                               center
+                               size="md"
+                               label="Loading messages…"
+                               class="mt-4" />
                     <div v-else-if="messages.length === 0"
                          class="text-center text-gray-500 mt-4">No messages available yet. Start the conversation!</div>
                     <div v-else
@@ -119,6 +122,7 @@ import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router' // Import useRouter
 import { useAuth } from '../stores/auth'
 import API_BASE_URL from '../config/api'
+import AppLoader from '../components/AppLoader.vue'
 
 const { user, getToken } = useAuth()
 const conversations = ref([])
