@@ -67,10 +67,6 @@ const popularGenres = ref([])
 const loadingTopBooks = ref(true)
 const loadingGenres = ref(true)
 
-import { useRoute } from 'vue-router'
-
-const route = useRoute()
-
 const fetchTopBooks = async () => {
     loadingTopBooks.value = true
     try {
@@ -99,13 +95,9 @@ const fetchPopularGenres = async () => {
     }
 }
 
-import { watch } from 'vue'
-
-watch(() => route.path, () => {
-    fetchTopBooks()
-    fetchPopularGenres()
-})
-
+// Fetch once when the sidebar mounts. RightSidebar lives outside <router-view>
+// in App.vue, so it persists across in-app navigation — re-fetching on every
+// route change would needlessly reload this otherwise-static content.
 onMounted(() => {
     fetchTopBooks()
     fetchPopularGenres()
