@@ -182,7 +182,7 @@
                             </p>
                             <p v-if="promo.description"
                                class="text-sm text-gray-500 dark:text-gray-400 mt-2 line-clamp-3">{{ promo.description
-                                }}
+                            }}
                             </p>
                             <div class="mt-3 space-y-1 text-xs text-gray-500 dark:text-gray-400">
                                 <p v-if="promo.event_date">📅 {{ formatEventDate(promo.event_date) }}</p>
@@ -337,6 +337,7 @@ const editing = ref(null)
 const deleting = ref(null)
 
 const typeMeta = {
+    staff_pick: { label: 'Staff Pick', class: 'bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-200' },
     event: { label: 'Event', class: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200' },
     launch: { label: 'Launch', class: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200' },
     ad: { label: 'Sponsored', class: 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-200' },
@@ -344,6 +345,7 @@ const typeMeta = {
 }
 
 const sectionDefs = [
+    { key: 'staff_pick', title: 'Staff Picks' },
     { key: 'event', title: 'Upcoming Events' },
     { key: 'launch', title: 'New & Upcoming Launches' },
     { key: 'ad', title: 'Sponsored' }

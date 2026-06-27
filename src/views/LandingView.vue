@@ -1,10 +1,14 @@
 <template>
-    <div class="min-h-[85vh] flex flex-col items-center justify-center text-center px-4 relative isolate overflow-hidden">
+    <div
+         class="min-h-[85vh] flex flex-col items-center justify-center text-center px-4 relative isolate overflow-hidden">
         <!-- Library hero background image (self-hosted, Pexels) -->
-        <div class="hero-bg absolute inset-0" :style="{ backgroundImage: `url(${libraryHero})` }" aria-hidden="true">
+        <div class="hero-bg absolute inset-0"
+             :style="{ backgroundImage: `url(${libraryHero})` }"
+             aria-hidden="true">
         </div>
         <!-- Readability scrim that blends the photo into the page background -->
-        <div class="hero-scrim absolute inset-0" aria-hidden="true"></div>
+        <div class="hero-scrim absolute inset-0"
+             aria-hidden="true"></div>
 
         <!-- Animated background elements -->
         <div class="absolute inset-0 -z-10 overflow-hidden">
@@ -79,7 +83,7 @@
         <div class="fade-in-up delay-1000 mt-16 grid grid-cols-3 gap-8 max-w-2xl mx-auto text-center">
             <div>
                 <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400 counter">{{ animatedStats.totalBooks
-                    }}+</div>
+                }}+</div>
                 <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Books Shared</div>
             </div>
             <div>
@@ -94,6 +98,50 @@
                 <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Genres</div>
             </div>
         </div>
+
+        <!-- Book of the Week — curated staff pick pulled from the promotions system -->
+        <div v-if="bookOfWeek"
+             class="fade-in-up delay-1000 mt-16 w-full max-w-3xl mx-auto">
+            <div
+                 class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-indigo-100 dark:border-gray-700 overflow-hidden text-left">
+                <div class="flex flex-col sm:flex-row">
+                    <!-- Cover -->
+                    <div class="sm:w-44 h-56 sm:h-auto flex-shrink-0 bg-gray-100 dark:bg-gray-700">
+                        <AppImage :src="bookOfWeek.image_path"
+                                  alt=""
+                                  img-class="object-cover w-full h-full" />
+                    </div>
+                    <!-- Details -->
+                    <div class="p-6 flex flex-col flex-1">
+                        <span
+                              class="inline-flex items-center gap-1 w-fit px-3 py-1 rounded-full text-xs font-semibold bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-200 mb-3">
+                            📖 Book of the Week
+                        </span>
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ bookOfWeek.title }}</h3>
+                        <p v-if="bookOfWeek.subtitle"
+                           class="text-base text-gray-600 dark:text-gray-300 mt-1">{{ bookOfWeek.subtitle }}</p>
+                        <p v-if="bookOfWeek.description"
+                           class="text-sm text-gray-500 dark:text-gray-400 mt-3 line-clamp-4">{{ bookOfWeek.description
+                            }}
+                        </p>
+                        <div class="mt-auto pt-5 flex flex-wrap items-center gap-3">
+                            <a v-if="safeLink(bookOfWeek.link_url)"
+                               :href="bookOfWeek.link_url"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               @click="trackClick(bookOfWeek)"
+                               class="inline-block px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition-colors">
+                                {{ bookOfWeek.cta_label || 'Learn more' }}
+                            </a>
+                            <router-link to="/books"
+                                         class="inline-block px-5 py-2.5 rounded-lg border-2 border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400 font-semibold hover:bg-indigo-50 dark:hover:bg-gray-700 transition-colors">
+                                Browse the shelves
+                            </router-link>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -102,8 +150,31 @@ import { ref, onMounted, watch } from 'vue'
 import { useAuth } from '@clerk/vue'
 import API_BASE_URL from '../config/api'
 import libraryHero from '../assets/library-hero.jpg'
+import AppImage from '../components/AppImage.vue'
 
 const { isSignedIn } = useAuth()
+
+// Curated "Book of the Week" staff pick, surfaced from the promotions system.
+const bookOfWeek = ref(null)
+
+const safeLink = (url) => !!url && /^https?:\/\//i.test(url)
+
+const trackClick = (promo) => {
+    if (!promo?.id) return
+    // Fire-and-forget; never block on analytics.
+    fetch(`${API_BASE_URL}/community/promotions/${promo.id}/click`, { method: 'POST' }).catch(() => { })
+}
+
+const loadBookOfWeek = async () => {
+    try {
+        const res = await fetch(`${API_BASE_URL}/community/promotions?type=staff_pick`)
+        if (!res.ok) return
+        const data = await res.json()
+        bookOfWeek.value = Array.isArray(data) && data.length > 0 ? data[0] : null
+    } catch (e) {
+        console.error('Failed to fetch book of the week:', e)
+    }
+}
 
 const stats = ref({
     totalBooks: 0,
@@ -137,6 +208,7 @@ const animateCounter = (key, target) => {
 }
 
 onMounted(async () => {
+    loadBookOfWeek()
     try {
         const res = await fetch(`${API_BASE_URL}/stats`)
         if (res.ok) {

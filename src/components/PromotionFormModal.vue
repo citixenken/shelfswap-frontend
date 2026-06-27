@@ -216,6 +216,7 @@ const emit = defineEmits(['close', 'saved'])
 const { getToken } = useAuth()
 
 const typeOptions = [
+    { value: 'staff_pick', label: 'Staff pick / Book of the week' },
     { value: 'event', label: 'Event (fairs, signings, meetups)' },
     { value: 'launch', label: 'Book launch' },
     { value: 'ad', label: 'Sponsored ad' },
