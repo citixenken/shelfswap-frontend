@@ -99,6 +99,53 @@
             </div>
         </div>
 
+        <!-- Live activity proof — real, recent momentum to build trust + FOMO -->
+        <div v-if="hasActivity"
+             class="fade-in-up delay-1000 mt-16 w-full max-w-5xl mx-auto">
+            <div class="flex flex-col items-center gap-5">
+                <!-- This-week momentum pills -->
+                <div class="flex flex-wrap items-center justify-center gap-3">
+                    <span v-if="recentActivity.swaps_this_week > 0"
+                          class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200">
+                        <span class="relative flex h-2.5 w-2.5">
+                            <span
+                                  class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                        </span>
+                        {{ recentActivity.swaps_this_week }} swap{{ recentActivity.swaps_this_week === 1 ? '' : 's' }}
+                        this week
+                    </span>
+                    <span v-if="recentActivity.books_this_week > 0"
+                          class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200">
+                        📚 {{ recentActivity.books_this_week }} new book{{ recentActivity.books_this_week === 1 ? '' : 's'
+                        }} this week
+                    </span>
+                </div>
+
+                <!-- Wall of real covers — auto-scrolling carousel of the 6 freshest books -->
+                <div v-if="carouselBooks.length"
+                     class="w-full">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4 text-center">Fresh on the
+                        shelves</p>
+                    <div class="cover-marquee relative w-full py-3">
+                        <div class="cover-marquee__track flex w-max">
+                            <router-link v-for="(book, i) in carouselTrack"
+                                         :key="`${book.id}-${i}`"
+                                         :to="`/books/${book.id}`"
+                                         :title="`${book.title} — ${book.author}`"
+                                         :aria-hidden="i >= carouselBooks.length ? 'true' : undefined"
+                                         :tabindex="i >= carouselBooks.length ? -1 : undefined"
+                                         class="cover-marquee__item block w-24 sm:w-28 md:w-32 mr-3 sm:mr-4 md:mr-5 aspect-[2/3] flex-shrink-0 rounded-lg overflow-hidden shadow-md bg-gray-100 dark:bg-gray-700 transition duration-200 hover:scale-105 hover:shadow-lg">
+                                <AppImage :src="book.image_path"
+                                          :alt="book.title"
+                                          img-class="object-cover w-full h-full" />
+                            </router-link>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Book of the Week — curated staff pick pulled from the promotions system -->
         <div v-if="bookOfWeek"
              class="fade-in-up delay-1000 mt-16 w-full max-w-3xl mx-auto">
@@ -146,7 +193,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useAuth } from '@clerk/vue'
 import API_BASE_URL from '../config/api'
 import libraryHero from '../assets/library-hero.jpg'
@@ -173,6 +220,44 @@ const loadBookOfWeek = async () => {
         bookOfWeek.value = Array.isArray(data) && data.length > 0 ? data[0] : null
     } catch (e) {
         console.error('Failed to fetch book of the week:', e)
+    }
+}
+
+// Live-activity proof: recent covers + this-week momentum counts.
+const recentActivity = ref({ recent_books: [], books_this_week: 0, swaps_this_week: 0 })
+
+const hasActivity = computed(() => {
+    const a = recentActivity.value
+    return !!a && ((a.recent_books?.length || 0) > 0 || a.swaps_this_week > 0 || a.books_this_week > 0)
+})
+
+// Only the 6 freshest covers cycle through the carousel.
+const carouselBooks = computed(() => (recentActivity.value.recent_books || []).slice(0, 6))
+
+// Duplicate the set so the CSS marquee loops seamlessly at translateX(-50%).
+// When few covers exist we repeat the base set first so the track still fills
+// the widest container (no visible gap mid-scroll).
+const carouselTrack = computed(() => {
+    const base = carouselBooks.value
+    if (base.length === 0) return []
+    const repeats = Math.max(1, Math.ceil(6 / base.length))
+    const oneSet = []
+    for (let r = 0; r < repeats; r++) oneSet.push(...base)
+    return [...oneSet, ...oneSet]
+})
+
+const loadRecentActivity = async () => {
+    try {
+        const res = await fetch(`${API_BASE_URL}/activity/recent`)
+        if (!res.ok) return
+        const data = await res.json()
+        recentActivity.value = {
+            recent_books: Array.isArray(data.recent_books) ? data.recent_books : [],
+            books_this_week: data.books_this_week || 0,
+            swaps_this_week: data.swaps_this_week || 0
+        }
+    } catch (e) {
+        console.error('Failed to fetch recent activity:', e)
     }
 }
 
@@ -209,6 +294,7 @@ const animateCounter = (key, target) => {
 
 onMounted(async () => {
     loadBookOfWeek()
+    loadRecentActivity()
     try {
         const res = await fetch(`${API_BASE_URL}/stats`)
         if (res.ok) {
@@ -393,6 +479,34 @@ onMounted(async () => {
     }
 }
 
+/* Fresh-on-the-shelves auto-scrolling cover carousel */
+.cover-marquee {
+    overflow: hidden;
+    /* Fade the covers softly into the page at both edges */
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+    mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+}
+
+.cover-marquee__track {
+    animation: coverMarquee 32s linear infinite;
+    will-change: transform;
+}
+
+/* Pause so visitors can read titles / click a cover */
+.cover-marquee:hover .cover-marquee__track {
+    animation-play-state: paused;
+}
+
+@keyframes coverMarquee {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-50%);
+    }
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .floating-book {
@@ -405,6 +519,15 @@ onMounted(async () => {
     .hero-bg {
         animation: none;
         transform: none;
+    }
+
+    /* Stop the auto-scroll and let users swipe through covers instead */
+    .cover-marquee {
+        overflow-x: auto;
+    }
+
+    .cover-marquee__track {
+        animation: none;
     }
 }
 </style>
