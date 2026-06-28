@@ -76,6 +76,7 @@
     </div>
     <TheFooter />
     <ToastNotification />
+    <MatchModal />
     <CookieConsent />
   </div>
 </template>
@@ -91,11 +92,14 @@ import ThemeSwitcher from './components/ThemeSwitcher.vue'
 import Sidebar from './components/Sidebar.vue'
 import RightSidebar from './components/RightSidebar.vue'
 import CookieConsent from './components/CookieConsent.vue'
+import MatchModal from './components/MatchModal.vue'
+import { useMatch } from './composables/useMatch'
 import API_BASE_URL from './config/api'
 
 const isSidebarOpen = ref(false)
 const { isSignedIn } = useAuth()
 const { checkAuth, user, getToken } = useLocalAuth()
+const { showMatch } = useMatch()
 const router = useRouter()
 const route = useRoute()
 const unreadCount = ref(0)
@@ -164,6 +168,14 @@ const connectSSE = async () => {
         unreadCount.value = data.count
       } catch (e) {
         console.error('[SSE] Failed to parse event data:', e)
+      }
+    })
+
+    eventSource.addEventListener('match', (event) => {
+      try {
+        showMatch(JSON.parse(event.data))
+      } catch (e) {
+        console.error('[SSE] Failed to parse match event:', e)
       }
     })
 

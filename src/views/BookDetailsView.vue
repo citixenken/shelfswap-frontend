@@ -70,6 +70,7 @@ import AppImage from '../components/AppImage.vue'
 import AppLoader from '../components/AppLoader.vue'
 import { useAuth } from '../stores/auth'
 import { useToast } from '../composables/useToast'
+import { useMatch } from '../composables/useMatch'
 import API_BASE_URL from '../config/api'
 
 const route = useRoute()
@@ -81,6 +82,7 @@ const showDeleteModal = ref(false)
 const requesting = ref(false)
 const { user, isAuthenticated, getToken } = useAuth()
 const { showToast } = useToast()
+const { showMatch } = useMatch()
 
 const isOwner = computed(() => {
     return book.value && user.value && book.value.user_id === user.value.id
@@ -154,8 +156,17 @@ const requestBook = async () => {
             }
         })
         if (res.ok) {
-            showToast('Request sent successfully! Redirecting to chat...', 'success')
             book.value.is_requested = true
+            const data = await res.json().catch(() => ({}))
+
+            // A mutual swap was detected — celebrate the match and let the user
+            // jump into chat from the modal instead of auto-redirecting.
+            if (data.match) {
+                showMatch(data.match)
+                return
+            }
+
+            showToast('Request sent successfully! Redirecting to chat...', 'success')
 
             // Initialize chat
             try {
