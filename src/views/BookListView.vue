@@ -45,6 +45,15 @@
                     <div class="flex-1">
                         <h2 class="text-xl font-semibold dark:text-white line-clamp-2">{{ book.title }}</h2>
                         <p class="text-gray-600 dark:text-gray-400">by {{ book.author }}</p>
+                        <div v-if="book.review_count > 0"
+                             class="flex items-center gap-1.5 mt-1">
+                            <StarRating :model-value="book.average_rating"
+                                        readonly
+                                        size="sm" />
+                            <span class="text-xs text-gray-500 dark:text-gray-400">
+                                {{ Number(book.average_rating).toFixed(1) }} ({{ book.review_count }})
+                            </span>
+                        </div>
                         <p class="text-gray-500 dark:text-gray-500 text-sm mt-2 line-clamp-3">{{ book.description }}</p>
                     </div>
                 </div>
@@ -93,6 +102,7 @@ import { useRoute } from 'vue-router'
 import API_BASE_URL from '../config/api'
 import AppImage from '../components/AppImage.vue'
 import AppLoader from '../components/AppLoader.vue'
+import StarRating from '../components/StarRating.vue'
 
 import { useAuth } from '../stores/auth'
 

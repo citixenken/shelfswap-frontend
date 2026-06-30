@@ -55,6 +55,100 @@
             </div>
         </div>
 
+        <!-- Reviews & ratings -->
+        <section v-if="book"
+                 class="max-w-2xl mx-auto mt-6 bg-white dark:bg-gray-800 p-6 rounded shadow-md">
+            <div class="flex items-center justify-between gap-4 mb-4">
+                <h2 class="text-2xl font-bold dark:text-white">Reviews</h2>
+                <div v-if="reviewCount > 0"
+                     class="flex items-center gap-2">
+                    <StarRating :model-value="averageRating"
+                                readonly />
+                    <span class="text-sm text-gray-600 dark:text-gray-300">
+                        {{ averageRating.toFixed(1) }} · {{ reviewCount }} review{{ reviewCount === 1 ? '' : 's' }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Write / edit your review -->
+            <div v-if="canReview"
+                 class="mb-6 border-b dark:border-gray-700 pb-6">
+                <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ myReview ? 'Your review' : 'Write a review' }}
+                </p>
+                <StarRating v-model="myRating"
+                            size="lg"
+                            class="mb-3" />
+                <textarea v-model="myBody"
+                          rows="3"
+                          maxlength="2000"
+                          placeholder="Share what you thought about this book (optional)"
+                          class="w-full p-2 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"></textarea>
+                <div class="flex items-center gap-3 mt-3">
+                    <button @click="submitReview"
+                            :disabled="submittingReview || myRating < 1"
+                            class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                        {{ submittingReview ? 'Saving…' : (myReview ? 'Update review' : 'Post review') }}
+                    </button>
+                    <button v-if="myReview"
+                            @click="deleteReview"
+                            :disabled="submittingReview"
+                            class="text-red-600 dark:text-red-400 px-3 py-2 rounded hover:bg-red-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors">
+                        Delete
+                    </button>
+                </div>
+            </div>
+            <p v-else-if="isOwner"
+               class="text-sm text-gray-500 dark:text-gray-400 mb-6 italic">
+                You can't review your own book.
+            </p>
+            <p v-else-if="!isAuthenticated"
+               class="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                <router-link to="/login"
+                             class="text-indigo-600 dark:text-indigo-400 hover:underline">Sign in</router-link>
+                to leave a review.
+            </p>
+
+            <!-- Reviews list -->
+            <AppLoader v-if="reviewsLoading"
+                       center
+                       label="Loading reviews…" />
+            <div v-else-if="reviewCount === 0"
+                 class="text-sm text-gray-500 dark:text-gray-400">
+                No reviews yet. Be the first to share your thoughts!
+            </div>
+            <ul v-else
+                class="space-y-5">
+                <li v-for="r in reviews"
+                    :key="r.id"
+                    class="flex gap-3">
+                    <div
+                         class="w-9 h-9 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 flex-shrink-0 flex items-center justify-center">
+                        <AppImage :src="r.user_avatar_path"
+                                  alt="">
+                            <template #fallback>
+                                <span class="text-sm font-bold text-gray-500 dark:text-gray-300">
+                                    {{ (r.user_username || 'M').charAt(0).toUpperCase() }}
+                                </span>
+                            </template>
+                        </AppImage>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="font-medium text-gray-800 dark:text-gray-100">{{ r.user_username || 'ShelfSwap Member' }}</span>
+                            <StarRating :model-value="r.rating"
+                                        readonly
+                                        size="sm" />
+                            <span class="text-xs text-gray-400">{{ formatReviewDate(r.updated_at) }}</span>
+                        </div>
+                        <p v-if="r.body"
+                           class="text-sm text-gray-600 dark:text-gray-300 mt-1 whitespace-pre-wrap break-words">{{
+                            r.body }}</p>
+                    </div>
+                </li>
+            </ul>
+        </section>
+
         <ConfirmModal :isOpen="showDeleteModal"
                       message="Are you sure you want to delete this book? This action cannot be undone."
                       @confirm="confirmDelete"
@@ -63,11 +157,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ConfirmModal from '../components/ConfirmModal.vue'
 import AppImage from '../components/AppImage.vue'
 import AppLoader from '../components/AppLoader.vue'
+import StarRating from '../components/StarRating.vue'
 import { useAuth } from '../stores/auth'
 import { useToast } from '../composables/useToast'
 import { useMatch } from '../composables/useMatch'
@@ -87,6 +182,41 @@ const { showMatch } = useMatch()
 const isOwner = computed(() => {
     return book.value && user.value && book.value.user_id === user.value.id
 })
+
+// --- Reviews & ratings ---
+const reviews = ref([])
+const reviewsLoading = ref(false)
+const myRating = ref(0)
+const myBody = ref('')
+const submittingReview = ref(false)
+
+const reviewCount = computed(() => reviews.value.length)
+const averageRating = computed(() => {
+    if (!reviews.value.length) return 0
+    const sum = reviews.value.reduce((acc, r) => acc + (r.rating || 0), 0)
+    return sum / reviews.value.length
+})
+const myReview = computed(() => {
+    if (!user.value) return null
+    return reviews.value.find(r => r.user_id === user.value.id) || null
+})
+const canReview = computed(() => isAuthenticated.value && !isOwner.value)
+
+// Prefill the form when an existing review is found. We intentionally don't
+// reset on null so a member's in-progress first review isn't cleared.
+watch(myReview, (r) => {
+    if (r) {
+        myRating.value = r.rating
+        myBody.value = r.body || ''
+    }
+}, { immediate: true })
+
+const formatReviewDate = (dateString) => {
+    if (!dateString) return ''
+    return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric', month: 'short', day: 'numeric'
+    })
+}
 
 const formatDate = (dateString) => {
     if (!dateString) return ''
@@ -193,5 +323,75 @@ const requestBook = async () => {
     }
 }
 
-onMounted(fetchBook)
+const fetchReviews = async () => {
+    reviewsLoading.value = true
+    try {
+        const res = await fetch(`${API_BASE_URL}/books/${route.params.id}/reviews`)
+        if (res.ok) {
+            reviews.value = (await res.json()) || []
+        }
+    } catch (e) {
+        console.error('Failed to load reviews', e)
+    } finally {
+        reviewsLoading.value = false
+    }
+}
+
+const submitReview = async () => {
+    if (myRating.value < 1) {
+        showToast('Please select a rating', 'error')
+        return
+    }
+    submittingReview.value = true
+    try {
+        const token = await getToken()
+        const res = await fetch(`${API_BASE_URL}/books/${route.params.id}/reviews`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ rating: myRating.value, body: myBody.value })
+        })
+        if (res.ok) {
+            showToast(myReview.value ? 'Review updated' : 'Review posted', 'success')
+            await fetchReviews()
+        } else {
+            const msg = (await res.text().catch(() => '')).trim()
+            showToast(msg || 'Failed to save review', 'error')
+        }
+    } catch (e) {
+        showToast('Error saving review', 'error')
+    } finally {
+        submittingReview.value = false
+    }
+}
+
+const deleteReview = async () => {
+    submittingReview.value = true
+    try {
+        const token = await getToken()
+        const res = await fetch(`${API_BASE_URL}/books/${route.params.id}/reviews`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+        if (res.ok) {
+            myRating.value = 0
+            myBody.value = ''
+            showToast('Review removed', 'success')
+            await fetchReviews()
+        } else {
+            showToast('Failed to remove review', 'error')
+        }
+    } catch (e) {
+        showToast('Error removing review', 'error')
+    } finally {
+        submittingReview.value = false
+    }
+}
+
+onMounted(async () => {
+    await fetchBook()
+    fetchReviews()
+})
 </script>

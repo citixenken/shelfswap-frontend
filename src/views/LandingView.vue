@@ -83,7 +83,7 @@
         <div class="fade-in-up delay-1000 mt-16 grid grid-cols-3 gap-8 max-w-2xl mx-auto text-center">
             <div>
                 <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400 counter">{{ animatedStats.totalBooks
-                }}+</div>
+                    }}+</div>
                 <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Books Shared</div>
             </div>
             <div>
@@ -117,7 +117,8 @@
                     </span>
                     <span v-if="recentActivity.books_this_week > 0"
                           class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200">
-                        📚 {{ recentActivity.books_this_week }} new book{{ recentActivity.books_this_week === 1 ? '' : 's'
+                        📚 {{ recentActivity.books_this_week }} new book{{ recentActivity.books_this_week === 1 ? '' :
+                            's'
                         }} this week
                     </span>
                 </div>
@@ -169,7 +170,7 @@
                            class="text-base text-gray-600 dark:text-gray-300 mt-1">{{ bookOfWeek.subtitle }}</p>
                         <p v-if="bookOfWeek.description"
                            class="text-sm text-gray-500 dark:text-gray-400 mt-3 line-clamp-4">{{ bookOfWeek.description
-                            }}
+                        }}
                         </p>
                         <div class="mt-auto pt-5 flex flex-wrap items-center gap-3">
                             <a v-if="safeLink(bookOfWeek.link_url)"
