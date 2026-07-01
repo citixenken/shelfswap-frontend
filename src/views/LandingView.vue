@@ -83,7 +83,7 @@
         <div class="fade-in-up delay-1000 mt-16 grid grid-cols-3 gap-8 max-w-2xl mx-auto text-center">
             <div>
                 <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400 counter">{{ animatedStats.totalBooks
-                    }}+</div>
+                }}+</div>
                 <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Books Shared</div>
             </div>
             <div>
@@ -170,7 +170,7 @@
                            class="text-base text-gray-600 dark:text-gray-300 mt-1">{{ bookOfWeek.subtitle }}</p>
                         <p v-if="bookOfWeek.description"
                            class="text-sm text-gray-500 dark:text-gray-400 mt-3 line-clamp-4">{{ bookOfWeek.description
-                        }}
+                            }}
                         </p>
                         <div class="mt-auto pt-5 flex flex-wrap items-center gap-3">
                             <a v-if="safeLink(bookOfWeek.link_url)"
@@ -194,7 +194,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useAuth } from '@clerk/vue'
 import API_BASE_URL from '../config/api'
 import libraryHero from '../assets/library-hero.jpg'
@@ -274,23 +274,40 @@ const animatedStats = ref({
     totalGenres: 0
 })
 
-// Animate counter from 0 to target value
-const animateCounter = (key, target) => {
-    const duration = 2000 // 2 seconds
-    const steps = 60 // 60 frames
-    const increment = target / steps
-    const stepDuration = duration / steps
+// Frame-aligned counter animation. Using requestAnimationFrame (instead of
+// setInterval) keeps the count-up in sync with the browser's paint cycle, so
+// the hero stats settle smoothly without the micro-stutter a timer can cause.
+const prefersReducedMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 
-    let current = 0
-    const timer = setInterval(() => {
-        current += increment
-        if (current >= target) {
-            animatedStats.value[key] = target
-            clearInterval(timer)
+const counterRafs = {}
+let statsTimer = null
+
+const animateCounter = (key, target) => {
+    // Honor reduced-motion and skip the tween for empty/zero stats.
+    if (prefersReducedMotion || target <= 0) {
+        animatedStats.value[key] = target
+        return
+    }
+
+    const duration = 2000 // 2 seconds
+    const start = performance.now()
+
+    const step = (now) => {
+        const progress = Math.min((now - start) / duration, 1)
+        // easeOutCubic gives a natural, decelerating settle.
+        const eased = 1 - Math.pow(1 - progress, 3)
+        animatedStats.value[key] = Math.floor(target * eased)
+
+        if (progress < 1) {
+            counterRafs[key] = requestAnimationFrame(step)
         } else {
-            animatedStats.value[key] = Math.floor(current)
+            animatedStats.value[key] = target
         }
-    }, stepDuration)
+    }
+
+    counterRafs[key] = requestAnimationFrame(step)
 }
 
 onMounted(async () => {
@@ -308,7 +325,7 @@ onMounted(async () => {
             }
 
             // Trigger animations
-            setTimeout(() => {
+            statsTimer = setTimeout(() => {
                 animateCounter('totalBooks', stats.value.totalBooks)
                 animateCounter('activeUsers', stats.value.activeUsers)
                 animateCounter('totalGenres', stats.value.totalGenres)
@@ -317,6 +334,13 @@ onMounted(async () => {
     } catch (e) {
         console.error('Failed to fetch stats:', e)
     }
+})
+
+// Cancel any in-flight animation frames / timers so counter work never
+// continues after the user navigates away — keeps the next view stutter-free.
+onUnmounted(() => {
+    if (statsTimer) clearTimeout(statsTimer)
+    Object.values(counterRafs).forEach((id) => cancelAnimationFrame(id))
 })
 </script>
 
@@ -328,6 +352,9 @@ onMounted(async () => {
     background-position: center;
     background-repeat: no-repeat;
     transform: scale(1.02);
+    /* Promote to its own compositor layer so the ken-burns zoom repaints on
+       the GPU instead of thrashing the main thread (smoother landing hero). */
+    will-change: transform;
     /* slow, subtle ken-burns zoom keeps the hero feeling alive */
     animation: heroZoom 32s ease-in-out infinite alternate;
 }

@@ -1,3 +1,22 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ------------------------------------------------------------------ *
+ * Global scrollbar hiding                                            *
+ * Hide vertical & horizontal scrollbars across web and mobile while  *
+ * keeping scrolling (wheel, touch, keyboard) fully functional.       *
+ * Left unlayered so it always wins over Tailwind's layered styles.   *
+ * ------------------------------------------------------------------ */
+html,
+body,
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE & legacy Edge */
+}
+
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none; /* Chrome, Safari, Edge & mobile WebKit */
+}
