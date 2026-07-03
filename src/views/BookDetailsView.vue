@@ -53,6 +53,13 @@
                     Back to List
                 </router-link>
             </div>
+
+            <div v-if="isAuthenticated"
+                 class="mt-4 flex items-center gap-3">
+                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">My shelf:</span>
+                <ShelfStatusSelector v-model="shelfStatus"
+                                     :book-id="book.id" />
+            </div>
         </div>
 
         <!-- Reviews & ratings -->
@@ -163,6 +170,7 @@ import ConfirmModal from '../components/ConfirmModal.vue'
 import AppImage from '../components/AppImage.vue'
 import AppLoader from '../components/AppLoader.vue'
 import StarRating from '../components/StarRating.vue'
+import ShelfStatusSelector from '../components/ShelfStatusSelector.vue'
 import { useAuth } from '../stores/auth'
 import { useToast } from '../composables/useToast'
 import { useMatch } from '../composables/useMatch'
@@ -175,6 +183,7 @@ const loading = ref(true)
 const error = ref('')
 const showDeleteModal = ref(false)
 const requesting = ref(false)
+const shelfStatus = ref('')
 const { user, isAuthenticated, getToken } = useAuth()
 const { showToast } = useToast()
 const { showMatch } = useMatch()
@@ -245,6 +254,7 @@ const fetchBook = async () => {
             throw new Error('Failed to fetch book details')
         }
         book.value = await res.json()
+        shelfStatus.value = book.value?.shelf_status || ''
     } catch (e) {
         error.value = e.message
     } finally {

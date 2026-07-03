@@ -34,6 +34,10 @@
                 </div>
             </router-link>
         </div>
+
+        <div class="mt-10">
+            <ShelfSection heading="My Shelf" />
+        </div>
     </div>
 </template>
 
@@ -44,6 +48,7 @@ import { useRoute } from 'vue-router'
 import API_BASE_URL from '../config/api'
 import AppImage from '../components/AppImage.vue'
 import AppLoader from '../components/AppLoader.vue'
+import ShelfSection from '../components/ShelfSection.vue'
 
 const requests = ref([])
 const loading = ref(true)
