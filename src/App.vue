@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-papayawhip dark:bg-gray-900 flex flex-col transition-colors duration-300">
-    <nav class="bg-white dark:bg-gray-800 shadow transition-colors duration-300 z-40 relative">
-      <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+    <nav class="bg-white dark:bg-gray-800 shadow transition-colors duration-300 z-40 sticky top-0">
+      <div class="container mx-auto px-4 h-16 flex justify-between items-center">
         <div class="flex items-center">
           <button v-if="showSidebar"
                   @click="isSidebarOpen = true"
@@ -66,8 +66,18 @@
                :unreadCount="unreadCount"
                @close="isSidebarOpen = false" />
 
-      <div class="flex-grow w-full min-w-0">
-
+      <div class="flex-grow w-full min-w-0 relative isolate">
+        <!-- Bookshelf backdrop: cascades across every inner page but is clipped
+             to this middle column, so the left/right sidebars keep their own
+             solid background. `background-attachment: fixed` keeps the shelf
+             steady behind scrolling content, and the scrim keeps text legible. -->
+        <template v-if="showSidebar">
+          <div class="shelf-backdrop absolute inset-0 -z-10"
+               :style="{ backgroundImage: `url(${libraryHero})` }"
+               aria-hidden="true"></div>
+          <div class="shelf-scrim absolute inset-0 -z-10"
+               aria-hidden="true"></div>
+        </template>
 
         <router-view :key="$route.fullPath" />
       </div>
@@ -95,6 +105,7 @@ import CookieConsent from './components/CookieConsent.vue'
 import MatchModal from './components/MatchModal.vue'
 import { useMatch } from './composables/useMatch'
 import API_BASE_URL from './config/api'
+import libraryHero from './assets/library-hero.jpg'
 
 const isSidebarOpen = ref(false)
 const { isSignedIn } = useAuth()
@@ -234,5 +245,33 @@ onUnmounted(() => {
   -moz-osx-font-smoothing: grayscale;
   /* text-align: center; */
   color: #2c3e50;
+}
+
+/* Bookshelf backdrop shared by all inner pages (middle content column only). */
+.shelf-backdrop {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* Readability scrim: keeps content legible over the photo while the bookshelf
+   stays visible in the page margins. Matches the page background per theme. */
+.shelf-scrim {
+  background-color: rgba(255, 239, 213, 0.82);
+  /* papayawhip */
+}
+
+.dark .shelf-scrim {
+  background-color: rgba(17, 24, 39, 0.86);
+  /* gray-900 */
+}
+
+/* Fixed attachment repaints poorly on touch devices; fall back to a scrolling
+   cover there to avoid jank. */
+@media (hover: none) {
+  .shelf-backdrop {
+    background-attachment: scroll;
+  }
 }
 </style>

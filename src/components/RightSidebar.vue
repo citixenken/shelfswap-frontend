@@ -1,6 +1,6 @@
 <template>
     <div
-         class="w-64 flex-shrink-0 bg-white dark:bg-gray-800 border-l dark:border-gray-700 p-4 hidden lg:block h-screen sticky top-0 overflow-y-auto">
+         class="w-64 flex-shrink-0 bg-white dark:bg-gray-800 border-l dark:border-gray-700 p-4 hidden lg:block h-[calc(100vh-4rem)] sticky top-16 overflow-y-auto">
         <div class="mb-8">
             <h3 class="text-lg font-bold mb-4 dark:text-white">Top Books</h3>
             <AppLoader v-if="loadingTopBooks"
