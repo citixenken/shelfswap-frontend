@@ -142,15 +142,16 @@
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 flex-wrap">
-                            <span class="font-medium text-gray-800 dark:text-gray-100">{{ r.user_username || 'ShelfSwap Member' }}</span>
+                            <span class="font-medium text-gray-800 dark:text-gray-100">{{ r.user_username || 'ShelfSwap Member'
+                                }}</span>
                             <StarRating :model-value="r.rating"
                                         readonly
                                         size="sm" />
                             <span class="text-xs text-gray-400">{{ formatReviewDate(r.updated_at) }}</span>
                         </div>
                         <p v-if="r.body"
-                           class="text-sm text-gray-600 dark:text-gray-300 mt-1 whitespace-pre-wrap break-words">{{
-                            r.body }}</p>
+                           class="text-sm text-gray-600 dark:text-gray-300 mt-1 whitespace-pre-wrap break-words">
+                            {{r.body }}</p>
                     </div>
                 </li>
             </ul>
