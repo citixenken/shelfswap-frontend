@@ -14,8 +14,8 @@
                  class="mb-4 flex justify-center">
                 <AppImage :src="book.image_path"
                           alt="Book Cover"
-                          img-class="object-contain"
-                          wrapper-class="w-full max-w-xs aspect-[2/3] rounded-lg dark:bg-gray-700"
+                          img-class="object-cover"
+                          wrapper-class="w-full max-w-xs aspect-[2/3] rounded-lg shadow-md bg-gray-100 dark:bg-gray-700"
                           eager />
             </div>
             <div class="prose max-w-none mb-2 dark:text-gray-300">
