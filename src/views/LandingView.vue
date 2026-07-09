@@ -232,8 +232,8 @@ const hasActivity = computed(() => {
     return !!a && ((a.recent_books?.length || 0) > 0 || a.swaps_this_week > 0 || a.books_this_week > 0)
 })
 
-// Only the 6 freshest covers cycle through the carousel.
-const carouselBooks = computed(() => (recentActivity.value.recent_books || []).slice(0, 6))
+// Only the 10 freshest covers cycle through the carousel.
+const carouselBooks = computed(() => (recentActivity.value.recent_books || []).slice(0, 10))
 
 // Duplicate the set so the CSS marquee loops seamlessly at translateX(-50%).
 // When few covers exist we repeat the base set first so the track still fills
@@ -241,7 +241,7 @@ const carouselBooks = computed(() => (recentActivity.value.recent_books || []).s
 const carouselTrack = computed(() => {
     const base = carouselBooks.value
     if (base.length === 0) return []
-    const repeats = Math.max(1, Math.ceil(6 / base.length))
+    const repeats = Math.max(1, Math.ceil(10 / base.length))
     const oneSet = []
     for (let r = 0; r < repeats; r++) oneSet.push(...base)
     return [...oneSet, ...oneSet]
