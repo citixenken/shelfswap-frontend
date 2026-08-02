@@ -50,6 +50,18 @@
                         <p class="text-gray-600 dark:text-gray-400">Joined: {{ formatDate(user?.created_at) }}</p>
                         <p class="text-gray-600 dark:text-gray-400">Books Added: {{ books.length }}</p>
                     </div>
+                    <div class="flex items-center justify-center md:justify-start gap-6 mt-3">
+                        <div class="text-center">
+                            <span class="block text-lg font-bold dark:text-white">{{ followingCount }}</span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400">Following</span>
+                        </div>
+                        <div class="text-center">
+                            <span class="block text-lg font-bold dark:text-white">{{ followersCount }}</span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400">
+                                Follower{{ followersCount === 1 ? '' : 's' }}
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -95,11 +107,16 @@ import API_BASE_URL from '../config/api'
 import AppImage from '../components/AppImage.vue'
 import AppLoader from '../components/AppLoader.vue'
 import ShelfSection from '../components/ShelfSection.vue'
+import { useFollow } from '../composables/useFollow'
 
 const books = ref([])
 const loading = ref(true)
 const error = ref('')
 const { user, getToken } = useAuth()
+const { fetchFollowing, fetchFollowers } = useFollow()
+
+const followingCount = ref(0)
+const followersCount = ref(0)
 
 const userInitial = computed(() => {
     if (user.value && user.value.email) {
@@ -136,5 +153,23 @@ const fetchUserBooks = async () => {
     }
 }
 
-onMounted(fetchUserBooks)
+// loadFollowCounts populates the Following / Followers tallies in the header.
+const loadFollowCounts = async () => {
+    try {
+        const [following, followers] = await Promise.all([
+            fetchFollowing(true),
+            fetchFollowers()
+        ])
+        followingCount.value = (following || []).length
+        followersCount.value = (followers || []).length
+    } catch (e) {
+        // Non-critical: leave counts at zero if the lookup fails.
+        console.error('Failed to load follow counts:', e)
+    }
+}
+
+onMounted(() => {
+    fetchUserBooks()
+    loadFollowCounts()
+})
 </script>

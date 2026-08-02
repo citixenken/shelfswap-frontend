@@ -7,6 +7,22 @@
             </p>
         </header>
 
+        <!-- Scope toggle: the whole community, or just people you follow. -->
+        <div class="flex justify-center mb-6">
+            <div class="inline-flex rounded-lg bg-gray-100 dark:bg-gray-800 p-1">
+                <button @click="setFilter('everyone')"
+                        class="px-4 py-1.5 text-sm font-medium rounded-md transition-colors"
+                        :class="feedFilter === 'everyone' ? activeTab : inactiveTab">
+                    Everyone
+                </button>
+                <button @click="setFilter('following')"
+                        class="px-4 py-1.5 text-sm font-medium rounded-md transition-colors"
+                        :class="feedFilter === 'following' ? activeTab : inactiveTab">
+                    Following
+                </button>
+            </div>
+        </div>
+
         <AppLoader v-if="loading"
                    center
                    size="lg"
@@ -17,9 +33,17 @@
 
         <div v-else-if="items.length === 0"
              class="text-center text-gray-500 dark:text-gray-400 py-12">
-            No activity yet. Be the first to
-            <router-link to="/add"
-                         class="text-indigo-600 dark:text-indigo-400 hover:underline">list a book</router-link>!
+            <template v-if="feedFilter === 'following'">
+                No activity from people you follow yet.
+                <router-link to="/members"
+                             class="text-indigo-600 dark:text-indigo-400 hover:underline">Find members to
+                    follow</router-link>.
+            </template>
+            <template v-else>
+                No activity yet. Be the first to
+                <router-link to="/add"
+                             class="text-indigo-600 dark:text-indigo-400 hover:underline">list a book</router-link>!
+            </template>
         </div>
 
         <ul v-else
@@ -110,12 +134,18 @@ const loadingMore = ref(false)
 const error = ref('')
 const offset = ref(0)
 const hasMore = ref(false)
+const feedFilter = ref('everyone')
 const { getToken } = useAuth()
+
+// Tailwind class sets for the active / inactive scope-toggle tabs.
+const activeTab = 'bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 shadow'
+const inactiveTab = 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
 
 const fetchFeed = async (append = false) => {
     try {
         const token = await getToken()
-        const res = await fetch(`${API_BASE_URL}/feed?limit=${PAGE_SIZE}&offset=${offset.value}`, {
+        const filterParam = feedFilter.value === 'following' ? '&filter=following' : ''
+        const res = await fetch(`${API_BASE_URL}/feed?limit=${PAGE_SIZE}&offset=${offset.value}${filterParam}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
         if (!res.ok) throw new Error('Failed to load activity feed')
@@ -127,6 +157,19 @@ const fetchFeed = async (append = false) => {
     } catch (e) {
         error.value = e.message
     }
+}
+
+// setFilter switches between the community-wide feed and the "Following" feed,
+// resetting pagination and reloading from the top.
+const setFilter = async (filter) => {
+    if (feedFilter.value === filter) return
+    feedFilter.value = filter
+    offset.value = 0
+    error.value = ''
+    items.value = []
+    loading.value = true
+    await fetchFeed(false)
+    loading.value = false
 }
 
 const loadMore = async () => {

@@ -104,6 +104,7 @@ import RightSidebar from './components/RightSidebar.vue'
 import CookieConsent from './components/CookieConsent.vue'
 import MatchModal from './components/MatchModal.vue'
 import { useMatch } from './composables/useMatch'
+import { useToast } from './composables/useToast'
 import API_BASE_URL from './config/api'
 import libraryHero from './assets/library-hero.jpg'
 
@@ -111,6 +112,7 @@ const isSidebarOpen = ref(false)
 const { isSignedIn } = useAuth()
 const { checkAuth, user, getToken } = useLocalAuth()
 const { showMatch } = useMatch()
+const { showToast } = useToast()
 const router = useRouter()
 const route = useRoute()
 const unreadCount = ref(0)
@@ -187,6 +189,18 @@ const connectSSE = async () => {
         showMatch(JSON.parse(event.data))
       } catch (e) {
         console.error('[SSE] Failed to parse match event:', e)
+      }
+    })
+
+    // A member you follow listed a new book — nudge with a lightweight toast.
+    eventSource.addEventListener('new-listing', (event) => {
+      try {
+        const data = JSON.parse(event.data)
+        const actor = data.actor_name || 'Someone you follow'
+        const title = data.book_title ? `“${data.book_title}”` : 'a new book'
+        showToast(`${actor} listed ${title}`)
+      } catch (e) {
+        console.error('[SSE] Failed to parse new-listing event:', e)
       }
     })
 
