@@ -105,6 +105,7 @@ import CookieConsent from './components/CookieConsent.vue'
 import MatchModal from './components/MatchModal.vue'
 import { useMatch } from './composables/useMatch'
 import { useToast } from './composables/useToast'
+import { useReferral } from './composables/useReferral'
 import API_BASE_URL from './config/api'
 import libraryHero from './assets/library-hero.jpg'
 
@@ -113,6 +114,7 @@ const { isSignedIn } = useAuth()
 const { checkAuth, user, getToken } = useLocalAuth()
 const { showMatch } = useMatch()
 const { showToast } = useToast()
+const { captureRefFromURL, claimPendingReferral } = useReferral()
 const router = useRouter()
 const route = useRoute()
 const unreadCount = ref(0)
@@ -237,11 +239,18 @@ watch(isSignedIn, (newVal) => {
   if (newVal) {
     checkAuth()
     connectSSE()
+    // Attribute a pending referral once the new member is authenticated.
+    claimPendingReferral()
   } else {
     disconnectSSE()
     unreadCount.value = 0
   }
 }, { immediate: true })
+
+onMounted(() => {
+  // Stash any ?ref= code before it's lost to navigation / the Clerk redirect.
+  captureRefFromURL()
+})
 
 onUnmounted(() => {
   disconnectSSE()

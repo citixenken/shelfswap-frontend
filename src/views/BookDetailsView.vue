@@ -29,7 +29,7 @@
                 Added by {{ book.user_username || book.user_email || 'ShelfSwap Member' }}
             </p>
 
-            <div class="flex space-x-4 border-t pt-4">
+            <div class="flex flex-wrap items-center gap-3 border-t pt-4">
                 <template v-if="isOwner">
                     <router-link :to="`/books/${book.id}/edit`"
                                  class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
@@ -41,18 +41,33 @@
                     </button>
                 </template>
                 <template v-else-if="isAuthenticated">
-                    <button @click="requestBook"
+                    <button v-if="onboarding.unlocked"
+                            @click="requestBook"
                             :disabled="requesting || book.is_requested"
                             :class="book.is_requested ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'"
                             class="text-white px-4 py-2 rounded disabled:opacity-50 transition-colors">
                         {{ requesting ? 'Processing...' : (book.is_requested ? 'Book requested' : 'Request Book') }}
                     </button>
+                    <router-link v-else
+                                 to="/add"
+                                 class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded transition-colors">
+                        List {{ remaining() }} book{{ remaining() === 1 ? '' : 's' }} to unlock swapping
+                    </router-link>
                 </template>
                 <router-link to="/books"
                              class="text-gray-600 px-4 py-2 rounded hover:bg-gray-100 border">
                     Back to List
                 </router-link>
+                <ShareButton :title="book.title"
+                             :url="shareUrl"
+                             :image-url="shareImageUrl"
+                             class="ml-auto" />
             </div>
+            <p v-if="isAuthenticated && !isOwner && !onboarding.unlocked"
+               class="mt-3 text-sm text-gray-500 dark:text-gray-400">
+                You've listed {{ onboarding.booksListed }} of {{ onboarding.threshold }} books. List a few of your own
+                to start swapping and messaging.
+            </p>
 
             <div v-if="isAuthenticated"
                  class="mt-4 flex items-center gap-3">
@@ -172,9 +187,11 @@ import AppImage from '../components/AppImage.vue'
 import AppLoader from '../components/AppLoader.vue'
 import StarRating from '../components/StarRating.vue'
 import ShelfStatusSelector from '../components/ShelfStatusSelector.vue'
+import ShareButton from '../components/ShareButton.vue'
 import { useAuth } from '../stores/auth'
 import { useToast } from '../composables/useToast'
 import { useMatch } from '../composables/useMatch'
+import { useOnboarding } from '../composables/useOnboarding'
 import API_BASE_URL from '../config/api'
 
 const route = useRoute()
@@ -188,9 +205,20 @@ const shelfStatus = ref('')
 const { user, isAuthenticated, getToken } = useAuth()
 const { showToast } = useToast()
 const { showMatch } = useMatch()
+const { state: onboarding, fetchStatus: fetchOnboarding, remaining } = useOnboarding()
 
 const isOwner = computed(() => {
     return book.value && user.value && book.value.user_id === user.value.id
+})
+
+// Share targets: the public book page and the server-rendered share card.
+const shareUrl = computed(() => {
+    if (typeof window === 'undefined' || !book.value) return ''
+    return `${window.location.origin}/books/${book.value.id}`
+})
+const shareImageUrl = computed(() => {
+    if (!book.value) return ''
+    return `${API_BASE_URL}/books/${book.value.id}/share.svg`
 })
 
 // --- Reviews & ratings ---
@@ -324,7 +352,12 @@ const requestBook = async () => {
                 console.error("Failed to redirect to chat", e)
             }
         } else {
-            const data = await res.json()
+            const data = await res.json().catch(() => ({}))
+            // The onboarding gate returns a structured 403 — refresh the local
+            // gate state so the button swaps to the "list N books" prompt.
+            if (res.status === 403 && data.code === 'onboarding_required') {
+                await fetchOnboarding(true)
+            }
             showToast(data.error || 'Failed to send request', 'error')
         }
     } catch (e) {
@@ -405,4 +438,10 @@ onMounted(async () => {
     await fetchBook()
     fetchReviews()
 })
+
+// Load the onboarding-gate status so the request action gates correctly. The
+// immediate watch also covers the already-signed-in case on first render.
+watch(isAuthenticated, (signedIn) => {
+    if (signedIn) fetchOnboarding()
+}, { immediate: true })
 </script>

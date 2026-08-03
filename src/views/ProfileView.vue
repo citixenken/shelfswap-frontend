@@ -65,6 +65,42 @@
                 </div>
             </div>
 
+            <!-- Invite friends (referral program) -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded shadow-md mb-6">
+                <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+                    <h2 class="text-xl font-bold dark:text-white">Invite friends</h2>
+                    <span v-if="referral.count > 0"
+                          class="inline-flex items-center gap-1 text-sm font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200 px-3 py-1 rounded-full">
+                        🎉 {{ referral.count }} friend{{ referral.count === 1 ? '' : 's' }} invited
+                    </span>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-300 mb-3">
+                    Share your link — every friend who joins helps grow the ShelfSwap community.
+                </p>
+                <div class="flex items-stretch gap-2 mb-4">
+                    <input :value="referral.link"
+                           readonly
+                           aria-label="Your referral link"
+                           class="flex-1 min-w-0 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-700 dark:text-white text-sm" />
+                    <button @click="copyReferralLink"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded text-sm font-medium whitespace-nowrap transition-colors">
+                        Copy link
+                    </button>
+                </div>
+                <form @submit.prevent="submitInvites"
+                      class="flex flex-col sm:flex-row gap-2">
+                    <input v-model="inviteEmails"
+                           type="text"
+                           placeholder="friend@email.com, another@email.com"
+                           class="flex-1 min-w-0 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white text-sm" />
+                    <button type="submit"
+                            :disabled="invitingEmails"
+                            class="bg-gray-800 dark:bg-gray-600 hover:bg-gray-900 dark:hover:bg-gray-500 text-white px-4 py-2 rounded text-sm font-medium whitespace-nowrap disabled:opacity-60 transition-colors">
+                        {{ invitingEmails ? 'Sending…' : 'Email invites' }}
+                    </button>
+                </form>
+            </div>
+
             <h2 class="text-xl font-bold mb-4 dark:text-white">My Books</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <router-link v-for="book in books"
@@ -108,15 +144,21 @@ import AppImage from '../components/AppImage.vue'
 import AppLoader from '../components/AppLoader.vue'
 import ShelfSection from '../components/ShelfSection.vue'
 import { useFollow } from '../composables/useFollow'
+import { useReferral } from '../composables/useReferral'
+import { useToast } from '../composables/useToast'
 
 const books = ref([])
 const loading = ref(true)
 const error = ref('')
 const { user, getToken } = useAuth()
 const { fetchFollowing, fetchFollowers } = useFollow()
+const { state: referral, fetchMyReferral, sendInvites } = useReferral()
+const { showToast } = useToast()
 
 const followingCount = ref(0)
 const followersCount = ref(0)
+const inviteEmails = ref('')
+const invitingEmails = ref(false)
 
 const userInitial = computed(() => {
     if (user.value && user.value.email) {
@@ -168,8 +210,37 @@ const loadFollowCounts = async () => {
     }
 }
 
+const copyReferralLink = async () => {
+    if (!referral.link) return
+    try {
+        await navigator.clipboard.writeText(referral.link)
+        showToast('Referral link copied!')
+    } catch (e) {
+        showToast('Could not copy link', 'error')
+    }
+}
+
+const submitInvites = async () => {
+    const emails = inviteEmails.value.split(',').map(e => e.trim()).filter(Boolean)
+    if (!emails.length) {
+        showToast('Enter at least one email address', 'error')
+        return
+    }
+    invitingEmails.value = true
+    try {
+        const { sent } = await sendInvites(emails)
+        showToast(`Sent ${sent} invite${sent === 1 ? '' : 's'}!`)
+        inviteEmails.value = ''
+    } catch (e) {
+        showToast(e.message || 'Failed to send invites', 'error')
+    } finally {
+        invitingEmails.value = false
+    }
+}
+
 onMounted(() => {
     fetchUserBooks()
     loadFollowCounts()
+    fetchMyReferral()
 })
 </script>
