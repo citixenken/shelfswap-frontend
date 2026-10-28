@@ -69,7 +69,8 @@ export function useReferral() {
       if (res.ok) {
         const data = await res.json()
         state.code = data.code || ''
-        state.link = data.link || ''
+        // Build from the current origin so the link never points at the server's dev fallback.
+        state.link = state.code ? `${window.location.origin}/?ref=${encodeURIComponent(state.code)}` : data.link || ''
         state.count = data.count || 0
         state.loaded = true
       }
