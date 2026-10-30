@@ -3,7 +3,7 @@
          ref="root">
         <button type="button"
                 @click="onShareClick"
-                class="inline-flex items-center gap-2 px-4 py-2 rounded border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                class="w-full justify-center inline-flex items-center gap-2 px-4 py-2 rounded border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
             <svg class="w-4 h-4"
                  fill="none"
                  stroke="currentColor"
@@ -18,7 +18,7 @@
         </button>
 
         <div v-if="menuOpen"
-             class="absolute right-0 z-20 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1">
+             class="absolute left-0 right-0 sm:left-auto sm:w-48 z-20 mt-2 text-left bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1">
             <a :href="twitterUrl"
                target="_blank"
                rel="noopener noreferrer"

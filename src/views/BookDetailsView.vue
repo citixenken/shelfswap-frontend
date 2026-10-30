@@ -29,7 +29,7 @@
                 Added by {{ book.user_username || book.user_email || 'ShelfSwap Member' }}
             </p>
 
-            <div class="flex flex-wrap items-center gap-3 border-t pt-4">
+            <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 border-t pt-4 text-center">
                 <template v-if="isOwner">
                     <router-link :to="`/books/${book.id}/edit`"
                                  class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
@@ -61,7 +61,7 @@
                 <ShareButton :title="book.title"
                              :url="shareUrl"
                              :image-url="shareImageUrl"
-                             class="ml-auto" />
+                             class="sm:ml-auto" />
             </div>
             <p v-if="isAuthenticated && !isOwner && !onboarding.unlocked"
                class="mt-3 text-sm text-gray-500 dark:text-gray-400">
