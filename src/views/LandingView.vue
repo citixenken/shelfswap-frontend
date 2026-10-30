@@ -1,6 +1,5 @@
 <template>
-    <div
-         class="min-h-[85vh] flex flex-col items-center justify-center text-center px-4 relative isolate overflow-hidden">
+    <div class="relative isolate overflow-hidden px-4">
         <!-- Library hero background image (self-hosted, Pexels) -->
         <div class="hero-bg absolute inset-0"
              :style="{ backgroundImage: `url(${libraryHero})` }"
@@ -10,146 +9,87 @@
         <div class="hero-scrim absolute inset-0"
              aria-hidden="true"></div>
 
-        <!-- Animated background elements -->
-        <div class="absolute inset-0 -z-10 overflow-hidden">
-            <div class="floating-book absolute top-20 left-10 text-6xl opacity-10">📚</div>
-            <div class="floating-book delay-1 absolute top-40 right-20 text-5xl opacity-10">📖</div>
-            <div class="floating-book delay-2 absolute bottom-32 left-1/4 text-7xl opacity-10">📕</div>
-            <div class="floating-book delay-3 absolute bottom-20 right-1/3 text-6xl opacity-10">📗</div>
-        </div>
-
-        <!-- Main heading with fade-in animation -->
-        <div class="fade-in-up">
-            <h1 class="text-5xl md:text-7xl font-bold mb-6 text-gray-900 dark:text-white leading-tight">
-                Share what you've read. <br class="hidden md:inline" />
-                <span class="text-indigo-600 dark:text-indigo-400">Swap for what's next.</span>
+        <!-- Hero -->
+        <section class="min-h-[65vh] flex flex-col items-center justify-center text-center py-16">
+            <h1
+                class="fade-in-up text-5xl md:text-7xl font-bold text-gray-900 dark:text-white leading-tight max-w-4xl">
+                Books shouldn't have a <span class="text-indigo-600 dark:text-indigo-400">shelf-life</span>.
             </h1>
-        </div>
-
-        <!-- Subheading with delayed fade-in -->
-        <p class="fade-in-up delay-200 text-xl md:text-3xl text-gray-600 dark:text-gray-300 mb-10 font-light max-w-3xl">
-            A community for readers who pass books on instead of letting them gather dust.
-        </p>
-
-        <!-- Description with staggered fade-in -->
-        <div
-             class="fade-in-up delay-400 max-w-3xl mx-auto mb-12 text-gray-700 dark:text-gray-400 leading-relaxed text-lg space-y-4">
-            <p>
-                List the books you're ready to part with, browse what other members are
-                offering, and message them directly to set up a swap.
+            <p class="fade-in-up delay-200 mt-6 text-lg md:text-2xl text-gray-600 dark:text-gray-300 max-w-2xl">
+                Swap the books you've finished for the ones you want to read next.
             </p>
-            <p class="font-medium text-indigo-600 dark:text-indigo-400">
-                It's a simple way to find your next read and give your old favorites a new home.
+            <div class="fade-in-up delay-400 mt-10 flex flex-col sm:flex-row gap-4">
+                <router-link to="/books"
+                             class="bg-indigo-600 hover:bg-indigo-700 text-white text-lg font-semibold py-3.5 px-8 rounded-xl shadow-lg transition-colors">
+                    Browse books
+                </router-link>
+                <router-link v-if="!isSignedIn"
+                             to="/register"
+                             class="border-2 border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-gray-800 text-lg font-semibold py-3.5 px-8 rounded-xl transition-colors">
+                    Join ShelfSwap
+                </router-link>
+            </div>
+            <p v-if="stats.totalBooks > 0"
+               class="fade-in-up delay-400 mt-8">
+                <span
+                      class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-sm font-medium bg-white/70 dark:bg-gray-800/70 border border-emerald-200 dark:border-emerald-800 text-gray-700 dark:text-gray-300 shadow-sm">
+                    <span class="relative flex h-2.5 w-2.5"
+                          aria-hidden="true">
+                        <span
+                              class="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping motion-reduce:animate-none"></span>
+                        <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
+                    </span>
+                    <span class="status-pulse">
+                        {{ stats.totalBooks }} books shared · {{ stats.activeUsers }} readers · {{ stats.totalGenres }}
+                        genres
+                    </span>
+                </span>
             </p>
-        </div>
+        </section>
 
-        <!-- Feature highlights with slide-in animation -->
-        <div class="fade-in-up delay-600 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-12">
-            <router-link to="/add"
-                         class="feature-card p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
-                <h3 class="font-semibold text-lg mb-2 dark:text-white">1. List your books</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400">Add the titles you're ready to swap or lend to the
-                    community.</p>
-            </router-link>
-            <router-link to="/books"
-                         class="feature-card p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
-                <h3 class="font-semibold text-lg mb-2 dark:text-white">2. Browse the shelves</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400">See what other members are offering and request what
-                    you'd like to read.</p>
-            </router-link>
-            <router-link to="/members"
-                         class="feature-card p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
-                <h3 class="font-semibold text-lg mb-2 dark:text-white">3. Make the swap</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400">Chat to coordinate the handoff and keep good books
-                    in
-                    circulation.</p>
-            </router-link>
-        </div>
+        <!-- How it works -->
+        <section class="pb-16">
+            <h2
+                class="text-center text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-8">
+                How it works</h2>
+            <ol class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto text-center">
+                <li v-for="(step, i) in steps"
+                    :key="step.title">
+                    <div
+                         class="mx-auto mb-3 w-10 h-10 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center">
+                        {{ i + 1 }}</div>
+                    <h3 class="font-semibold text-lg text-gray-900 dark:text-white">{{ step.title }}</h3>
+                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ step.text }}</p>
+                </li>
+            </ol>
+        </section>
 
-        <!-- CTA buttons with pulse animation -->
-        <div class="fade-in-up delay-800 flex flex-col sm:flex-row gap-4">
-            <router-link to="/books"
-                         class="cta-button bg-indigo-600 hover:bg-indigo-700 text-white text-lg font-semibold py-4 px-10 rounded-xl shadow-xl transform transition hover:scale-105 duration-200">
-                Browse Books
-            </router-link>
-            <router-link v-if="!isSignedIn"
-                         to="/register"
-                         class="cta-button-outline border-2 border-double border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-gray-800 text-lg font-semibold py-4 px-10 rounded-xl shadow-lg transform transition hover:scale-105 duration-200">
-                Join ShelfSwap
-            </router-link>
-        </div>
-
-        <!-- Stats section -->
-        <div class="fade-in-up delay-1000 mt-16 grid grid-cols-3 gap-8 max-w-2xl mx-auto text-center">
-            <div>
-                <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400 counter">{{ animatedStats.totalBooks
-                }}+</div>
-                <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Books Shared</div>
-            </div>
-            <div>
-                <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400 counter">{{
-                    animatedStats.activeUsers }}+</div>
-                <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Active Readers</div>
-            </div>
-            <div>
-                <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400 counter">{{
-                    animatedStats.totalGenres }}+
-                </div>
-                <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Genres</div>
-            </div>
-        </div>
-
-        <!-- Live activity proof — real, recent momentum to build trust + FOMO -->
-        <div v-if="hasActivity"
-             class="fade-in-up delay-1000 mt-16 w-full max-w-5xl mx-auto">
-            <div class="flex flex-col items-center gap-5">
-                <!-- This-week momentum pills -->
-                <div class="flex flex-wrap items-center justify-center gap-3">
-                    <span v-if="recentActivity.swaps_this_week > 0"
-                          class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200">
-                        <span class="relative flex h-2.5 w-2.5">
-                            <span
-                                  class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-                        </span>
-                        {{ recentActivity.swaps_this_week }} swap{{ recentActivity.swaps_this_week === 1 ? '' : 's' }}
-                        this week
-                    </span>
-                    <span v-if="recentActivity.books_this_week > 0"
-                          class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200">
-                        📚 {{ recentActivity.books_this_week }} new book{{ recentActivity.books_this_week === 1 ? '' :
-                            's'
-                        }} this week
-                    </span>
-                </div>
-
-                <!-- Wall of real covers — auto-scrolling carousel of the 6 freshest books -->
-                <div v-if="carouselBooks.length"
-                     class="w-full">
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4 text-center">Fresh on the
-                        shelves</p>
-                    <div class="cover-marquee relative w-full py-3">
-                        <div class="cover-marquee__track flex w-max">
-                            <router-link v-for="(book, i) in carouselTrack"
-                                         :key="`${book.id}-${i}`"
-                                         :to="`/books/${book.id}`"
-                                         :title="`${book.title} — ${book.author}`"
-                                         :aria-hidden="i >= carouselBooks.length ? 'true' : undefined"
-                                         :tabindex="i >= carouselBooks.length ? -1 : undefined"
-                                         class="cover-marquee__item block w-24 sm:w-28 md:w-32 mr-3 sm:mr-4 md:mr-5 aspect-[2/3] flex-shrink-0 rounded-lg overflow-hidden shadow-md bg-gray-100 dark:bg-gray-700 transition duration-200 hover:scale-105 hover:shadow-lg">
-                                <AppImage :src="book.image_path"
-                                          :alt="book.title"
-                                          img-class="object-cover w-full h-full" />
-                            </router-link>
-                        </div>
-                    </div>
+        <!-- Real covers recently listed -->
+        <section v-if="carouselBooks.length"
+                 class="pb-16 w-full max-w-5xl mx-auto">
+            <h2
+                class="text-center text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4">
+                Fresh on the shelves</h2>
+            <div class="cover-marquee relative w-full py-3">
+                <div class="cover-marquee__track flex w-max">
+                    <router-link v-for="(book, i) in carouselTrack"
+                                 :key="`${book.id}-${i}`"
+                                 :to="`/books/${book.id}`"
+                                 :title="`${book.title} — ${book.author}`"
+                                 :aria-hidden="i >= carouselBooks.length ? 'true' : undefined"
+                                 :tabindex="i >= carouselBooks.length ? -1 : undefined"
+                                 class="cover-marquee__item block w-24 sm:w-28 md:w-32 mr-3 sm:mr-4 md:mr-5 aspect-[2/3] flex-shrink-0 rounded-lg overflow-hidden shadow-md bg-gray-100 dark:bg-gray-700 transition duration-200 hover:scale-105 hover:shadow-lg">
+                        <AppImage :src="book.image_path"
+                                  :alt="book.title"
+                                  img-class="object-cover w-full h-full" />
+                    </router-link>
                 </div>
             </div>
-        </div>
+        </section>
 
         <!-- Book of the Week — curated staff pick pulled from the promotions system -->
-        <div v-if="bookOfWeek"
-             class="fade-in-up delay-1000 mt-16 w-full max-w-3xl mx-auto">
+        <section v-if="bookOfWeek"
+                 class="pb-16 w-full max-w-3xl mx-auto">
             <div
                  class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-indigo-100 dark:border-gray-700 overflow-hidden text-left">
                 <div class="flex flex-col sm:flex-row">
@@ -189,18 +129,24 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useAuth } from '@clerk/vue'
 import API_BASE_URL from '../config/api'
 import libraryHero from '../assets/library-hero.jpg'
 import AppImage from '../components/AppImage.vue'
 
 const { isSignedIn } = useAuth()
+
+const steps = [
+    { title: 'List', text: "Add the books you've finished reading." },
+    { title: 'Request', text: 'Find a book you want and ask its owner.' },
+    { title: 'Swap', text: 'Chat to arrange the handoff. Your old book finds a new reader.' }
+]
 
 // Curated "Book of the Week" staff pick, surfaced from the promotions system.
 const bookOfWeek = ref(null)
@@ -224,13 +170,8 @@ const loadBookOfWeek = async () => {
     }
 }
 
-// Live-activity proof: recent covers + this-week momentum counts.
-const recentActivity = ref({ recent_books: [], books_this_week: 0, swaps_this_week: 0 })
-
-const hasActivity = computed(() => {
-    const a = recentActivity.value
-    return !!a && ((a.recent_books?.length || 0) > 0 || a.swaps_this_week > 0 || a.books_this_week > 0)
-})
+// Recently listed covers for the carousel.
+const recentActivity = ref({ recent_books: [] })
 
 // Only the 10 freshest covers cycle through the carousel.
 const carouselBooks = computed(() => (recentActivity.value.recent_books || []).slice(0, 10))
@@ -253,9 +194,7 @@ const loadRecentActivity = async () => {
         if (!res.ok) return
         const data = await res.json()
         recentActivity.value = {
-            recent_books: Array.isArray(data.recent_books) ? data.recent_books : [],
-            books_this_week: data.books_this_week || 0,
-            swaps_this_week: data.swaps_this_week || 0
+            recent_books: Array.isArray(data.recent_books) ? data.recent_books : []
         }
     } catch (e) {
         console.error('Failed to fetch recent activity:', e)
@@ -268,48 +207,6 @@ const stats = ref({
     totalGenres: 0
 })
 
-const animatedStats = ref({
-    totalBooks: 0,
-    activeUsers: 0,
-    totalGenres: 0
-})
-
-// Frame-aligned counter animation. Using requestAnimationFrame (instead of
-// setInterval) keeps the count-up in sync with the browser's paint cycle, so
-// the hero stats settle smoothly without the micro-stutter a timer can cause.
-const prefersReducedMotion =
-    typeof window !== 'undefined' &&
-    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-
-const counterRafs = {}
-let statsTimer = null
-
-const animateCounter = (key, target) => {
-    // Honor reduced-motion and skip the tween for empty/zero stats.
-    if (prefersReducedMotion || target <= 0) {
-        animatedStats.value[key] = target
-        return
-    }
-
-    const duration = 2000 // 2 seconds
-    const start = performance.now()
-
-    const step = (now) => {
-        const progress = Math.min((now - start) / duration, 1)
-        // easeOutCubic gives a natural, decelerating settle.
-        const eased = 1 - Math.pow(1 - progress, 3)
-        animatedStats.value[key] = Math.floor(target * eased)
-
-        if (progress < 1) {
-            counterRafs[key] = requestAnimationFrame(step)
-        } else {
-            animatedStats.value[key] = target
-        }
-    }
-
-    counterRafs[key] = requestAnimationFrame(step)
-}
-
 onMounted(async () => {
     loadBookOfWeek()
     loadRecentActivity()
@@ -317,30 +214,15 @@ onMounted(async () => {
         const res = await fetch(`${API_BASE_URL}/stats`)
         if (res.ok) {
             const data = await res.json()
-            // Map snake_case API response to camelCase
             stats.value = {
                 totalBooks: data.total_books || 0,
                 activeUsers: data.active_users || 0,
                 totalGenres: data.total_genres || 0
             }
-
-            // Trigger animations
-            statsTimer = setTimeout(() => {
-                animateCounter('totalBooks', stats.value.totalBooks)
-                animateCounter('activeUsers', stats.value.activeUsers)
-                animateCounter('totalGenres', stats.value.totalGenres)
-            }, 1000) // Start animation after 1 second delay
         }
     } catch (e) {
         console.error('Failed to fetch stats:', e)
     }
-})
-
-// Cancel any in-flight animation frames / timers so counter work never
-// continues after the user navigates away — keeps the next view stutter-free.
-onUnmounted(() => {
-    if (statsTimer) clearTimeout(statsTimer)
-    Object.values(counterRafs).forEach((id) => cancelAnimationFrame(id))
 })
 </script>
 
@@ -404,18 +286,6 @@ onUnmounted(() => {
     animation-delay: 0.4s;
 }
 
-.fade-in-up.delay-600 {
-    animation-delay: 0.6s;
-}
-
-.fade-in-up.delay-800 {
-    animation-delay: 0.8s;
-}
-
-.fade-in-up.delay-1000 {
-    animation-delay: 1s;
-}
-
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -428,82 +298,20 @@ onUnmounted(() => {
     }
 }
 
-/* Floating book animation */
-.floating-book {
-    animation: float 6s ease-in-out infinite;
+/* Gentle "live" pulse for the platform status line */
+.status-pulse {
+    animation: statusPulse 2.4s ease-in-out infinite;
 }
 
-.floating-book.delay-1 {
-    animation-delay: 1s;
-}
-
-.floating-book.delay-2 {
-    animation-delay: 2s;
-}
-
-.floating-book.delay-3 {
-    animation-delay: 3s;
-}
-
-@keyframes float {
+@keyframes statusPulse {
 
     0%,
     100% {
-        transform: translateY(0px) rotate(0deg);
+        opacity: 1;
     }
 
     50% {
-        transform: translateY(-20px) rotate(5deg);
-    }
-}
-
-/* Feature card hover effect */
-.feature-card {
-    transition: all 0.3s ease;
-}
-
-.feature-card:hover {
-    transform: translateY(-5px);
-}
-
-/* CTA button pulse */
-.cta-button {
-    position: relative;
-    overflow: hidden;
-}
-
-.cta-button::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
-    transform: translate(-50%, -50%);
-    transition: width 0.6s, height 0.6s;
-}
-
-.cta-button:hover::before {
-    width: 300px;
-    height: 300px;
-}
-
-/* Counter animation */
-.counter {
-    animation: countUp 2s ease-out forwards;
-}
-
-@keyframes countUp {
-    from {
-        opacity: 0;
-        transform: scale(0.5);
-    }
-
-    to {
-        opacity: 1;
-        transform: scale(1);
+        opacity: 0.6;
     }
 }
 
@@ -535,18 +343,20 @@ onUnmounted(() => {
     }
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .floating-book {
-        display: none;
-    }
-}
-
 /* Respect users who prefer reduced motion */
 @media (prefers-reduced-motion: reduce) {
     .hero-bg {
         animation: none;
         transform: none;
+    }
+
+    .fade-in-up {
+        animation: none;
+        opacity: 1;
+    }
+
+    .status-pulse {
+        animation: none;
     }
 
     /* Stop the auto-scroll and let users swipe through covers instead */
