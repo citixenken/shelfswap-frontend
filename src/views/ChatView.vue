@@ -71,7 +71,24 @@
                                   d="M15 19l-7-7 7-7"></path>
                         </svg>
                     </button>
-                    <h2 class="text-lg font-bold dark:text-white">{{ activeConversation.other_participant_name }}</h2>
+                    <h2 class="text-lg font-bold dark:text-white flex-1 min-w-0 truncate">{{
+                        activeConversation.other_participant_name }}</h2>
+                    <button type="button"
+                            @click="confirmTarget = { type: 'chat' }"
+                            class="ml-3 inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-gray-700 transition-colors"
+                            title="Delete chat">
+                        <svg class="w-4 h-4"
+                             fill="none"
+                             stroke="currentColor"
+                             viewBox="0 0 24 24"
+                             aria-hidden="true">
+                            <path stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  stroke-width="2"
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        <span class="hidden sm:inline">Delete chat</span>
+                    </button>
                 </div>
 
                 <!-- Messages -->
@@ -87,12 +104,21 @@
                     <div v-else
                          v-for="msg in messages"
                          :key="msg.id"
-                         :class="['flex flex-col', msg.sender_id === user.id ? 'items-end' : 'items-start']">
+                         :class="['group flex flex-col', msg.sender_id === user.id ? 'items-end' : 'items-start']">
                         <div
-                             :class="['max-w-[75%] rounded-lg px-4 py-2', msg.sender_id === user.id ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 dark:text-white']">
+                             :class="['max-w-[75%] rounded-lg px-4 py-2 break-words', msg.sender_id === user.id ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 dark:text-white']">
                             {{ msg.content }}
                         </div>
-                        <span class="text-xs text-gray-400 mt-1">{{ formatTime(msg.created_at) }}</span>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="text-xs text-gray-400">{{ formatTime(msg.created_at) }}</span>
+                            <button v-if="msg.sender_id === user.id"
+                                    type="button"
+                                    @click="confirmTarget = { type: 'message', message: msg }"
+                                    class="text-xs text-gray-400 hover:text-red-600 dark:hover:text-red-400 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 transition-opacity"
+                                    aria-label="Delete message">
+                                Delete
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -114,17 +140,25 @@
                 </div>
             </template>
         </div>
+
+        <ConfirmModal :is-open="!!confirmTarget"
+                      :message="confirmMessage"
+                      @confirm="confirmDelete"
+                      @cancel="confirmTarget = null" />
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router' // Import useRouter
 import { useAuth } from '../stores/auth'
+import { useToast } from '../composables/useToast'
 import API_BASE_URL from '../config/api'
 import AppLoader from '../components/AppLoader.vue'
+import ConfirmModal from '../components/ConfirmModal.vue'
 
 const { user, getToken } = useAuth()
+const { showToast } = useToast()
 const conversations = ref([])
 const activeConversation = ref(null)
 const messages = ref([])
@@ -135,6 +169,57 @@ const messagesContainer = ref(null)
 const route = useRoute()
 const router = useRouter() // Initialize router
 let pollInterval
+
+// { type: 'chat' } or { type: 'message', message }
+const confirmTarget = ref(null)
+
+const confirmMessage = computed(() =>
+    confirmTarget.value?.type === 'message'
+        ? 'Delete this message for everyone? This cannot be undone.'
+        : 'Delete this chat? It will be removed from your inbox. The other person keeps their copy.'
+)
+
+const deleteChat = async (conversation) => {
+    const token = await getToken()
+    const res = await fetch(`${API_BASE_URL}/conversations/${conversation.id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+    })
+    if (!res.ok) throw new Error((await res.text().catch(() => '')).trim() || 'Could not delete chat')
+    conversations.value = conversations.value.filter(c => c.id !== conversation.id)
+    if (activeConversation.value?.id === conversation.id) {
+        activeConversation.value = null
+        messages.value = []
+    }
+    showToast('Chat deleted', 'success')
+}
+
+const deleteMessage = async (conversation, message) => {
+    const token = await getToken()
+    const res = await fetch(`${API_BASE_URL}/conversations/${conversation.id}/messages/${message.id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+    })
+    if (!res.ok) throw new Error((await res.text().catch(() => '')).trim() || 'Could not delete message')
+    messages.value = messages.value.filter(m => m.id !== message.id)
+    fetchConversations()
+}
+
+const confirmDelete = async () => {
+    const target = confirmTarget.value
+    const conversation = activeConversation.value
+    confirmTarget.value = null
+    if (!target || !conversation) return
+    try {
+        if (target.type === 'chat') {
+            await deleteChat(conversation)
+        } else {
+            await deleteMessage(conversation, target.message)
+        }
+    } catch (e) {
+        showToast(e.message, 'error')
+    }
+}
 
 const formatTime = (dateStr) => {
     if (!dateStr) return ''

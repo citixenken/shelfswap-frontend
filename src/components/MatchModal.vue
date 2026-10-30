@@ -8,21 +8,23 @@
             <div class="fixed inset-0 bg-gray-900/70 backdrop-blur-sm"
                  @click="hideMatch"></div>
 
-            <div class="match-card relative w-full max-w-md mx-auto rounded-2xl shadow-2xl overflow-hidden bg-white dark:bg-gray-800">
+            <div
+                 class="match-card relative w-full max-w-md mx-auto max-h-[calc(100vh-2rem)] overflow-y-auto rounded-2xl shadow-2xl bg-white dark:bg-gray-800">
                 <!-- Celebratory header -->
-                <div class="bg-gradient-to-r from-pink-500 via-rose-500 to-indigo-500 px-6 pt-8 pb-6 text-center text-white">
-                    <p class="text-4xl mb-1"
+                <div
+                     class="bg-gradient-to-r from-pink-500 via-rose-500 to-indigo-500 px-5 sm:px-6 pt-6 sm:pt-8 pb-5 sm:pb-6 text-center text-white">
+                    <p class="text-3xl sm:text-4xl mb-1"
                        aria-hidden="true">🎉</p>
                     <h2 id="match-title"
-                        class="text-3xl font-extrabold tracking-tight">It's a Match!</h2>
-                    <p class="mt-1 text-white/90">
+                        class="text-2xl sm:text-3xl font-extrabold tracking-tight">It's a Match!</h2>
+                    <p class="mt-1 text-sm sm:text-base text-white/90 break-words">
                         You and {{ state.match.other_user_name }} both want each other's books.
                     </p>
                 </div>
 
                 <!-- Book covers -->
-                <div class="px-6 py-6 flex items-stretch justify-center gap-3">
-                    <div class="flex-1 text-center">
+                <div class="px-5 sm:px-6 py-5 sm:py-6 flex items-stretch justify-center gap-3 sm:gap-4">
+                    <div class="flex-1 min-w-0 max-w-[10rem] text-center">
                         <p class="text-xs font-semibold uppercase tracking-wide text-green-600 dark:text-green-400 mb-2">
                             You'll get
                         </p>
@@ -48,7 +50,7 @@
                         </svg>
                     </div>
 
-                    <div class="flex-1 text-center">
+                    <div class="flex-1 min-w-0 max-w-[10rem] text-center">
                         <p class="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400 mb-2">
                             They'll get
                         </p>
@@ -63,15 +65,16 @@
                 </div>
 
                 <!-- Actions -->
-                <div class="px-6 pb-6 flex flex-col gap-2">
+                <div
+                     class="px-5 sm:px-6 pt-1 pb-5 sm:pb-6 flex flex-col-reverse sm:flex-row gap-3">
+                    <button @click="hideMatch"
+                            class="w-full sm:flex-1 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors">
+                        Maybe later
+                    </button>
                     <button @click="startChat"
                             :disabled="messaging"
-                            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2.5 rounded-lg transition-colors disabled:opacity-60">
+                            class="w-full sm:flex-1 min-w-0 truncate px-4 py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-sm transition-colors disabled:opacity-60">
                         {{ messaging ? 'Opening chat…' : `Message ${state.match.other_user_name}` }}
-                    </button>
-                    <button @click="hideMatch"
-                            class="w-full text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 font-medium px-4 py-2 rounded-lg transition-colors">
-                        Maybe later
                     </button>
                 </div>
             </div>
