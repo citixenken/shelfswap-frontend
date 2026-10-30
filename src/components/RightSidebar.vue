@@ -1,7 +1,7 @@
 <template>
     <div
          class="w-64 flex-shrink-0 bg-white dark:bg-gray-800 border-l dark:border-gray-700 p-4 hidden lg:block h-[calc(100vh-4rem)] sticky top-16 overflow-y-auto">
-        <div class="mb-8">
+        <div>
             <h3 class="text-lg font-bold mb-4 dark:text-white">Top Books</h3>
             <AppLoader v-if="loadingTopBooks"
                        size="sm"
@@ -34,6 +34,38 @@
                          class="block mt-4 text-sm text-blue-500 hover:underline">View All Top Books</router-link>
         </div>
 
+        <div class="my-6 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent dark:via-gray-600"
+             aria-hidden="true"></div>
+
+        <div>
+            <h3 class="text-lg font-bold mb-4 dark:text-white">Recommended Reads</h3>
+            <AppLoader v-if="loadingTopReads"
+                       size="sm"
+                       class="py-2" />
+            <div v-else-if="topReads.length === 0"
+                 class="text-sm text-gray-500">No recommended reads yet</div>
+            <ul v-else
+                class="space-y-3">
+                <li v-for="link in topReads"
+                    :key="link.id">
+                    <a v-if="safeLink(link.url)"
+                       :href="link.url"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="block group">
+                        <p
+                           class="text-sm font-semibold text-gray-800 dark:text-gray-200 group-hover:text-blue-500 line-clamp-2">
+                            {{ link.title }} <span class="text-xs text-gray-400">↗</span></p>
+                        <p v-if="link.description"
+                           class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">{{ link.description }}</p>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="my-6 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent dark:via-gray-600"
+             aria-hidden="true"></div>
+
         <div>
             <h3 class="text-lg font-bold mb-4 dark:text-white">Popular Genres</h3>
             <AppLoader v-if="loadingGenres"
@@ -61,6 +93,9 @@ import { ref, onMounted } from 'vue'
 import API_BASE_URL from '../config/api'
 import AppImage from '../components/AppImage.vue'
 import AppLoader from '../components/AppLoader.vue'
+import { useTopReads } from '../composables/useTopReads'
+
+const { links: topReads, loading: loadingTopReads, fetchLinks: fetchTopReads, safeLink } = useTopReads()
 
 const topBooks = ref([])
 const popularGenres = ref([])
@@ -100,6 +135,7 @@ const fetchPopularGenres = async () => {
 // route change would needlessly reload this otherwise-static content.
 onMounted(() => {
     fetchTopBooks()
+    fetchTopReads()
     fetchPopularGenres()
 })
 </script>

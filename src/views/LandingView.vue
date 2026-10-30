@@ -69,12 +69,12 @@
         <!-- CTA buttons with pulse animation -->
         <div class="fade-in-up delay-800 flex flex-col sm:flex-row gap-4">
             <router-link to="/books"
-                         class="cta-button bg-indigo-600 hover:bg-indigo-700 text-white text-lg font-semibold py-4 px-10 rounded-full shadow-xl transform transition hover:scale-105 duration-200">
+                         class="cta-button bg-indigo-600 hover:bg-indigo-700 text-white text-lg font-semibold py-4 px-10 rounded-xl shadow-xl transform transition hover:scale-105 duration-200">
                 Browse Books
             </router-link>
             <router-link v-if="!isSignedIn"
                          to="/register"
-                         class="cta-button-outline border-2 border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-gray-800 text-lg font-semibold py-4 px-10 rounded-full shadow-lg transform transition hover:scale-105 duration-200">
+                         class="cta-button-outline border-2 border-double border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-gray-800 text-lg font-semibold py-4 px-10 rounded-xl shadow-lg transform transition hover:scale-105 duration-200">
                 Join ShelfSwap
             </router-link>
         </div>

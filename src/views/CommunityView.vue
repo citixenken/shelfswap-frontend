@@ -23,7 +23,81 @@
                         class="px-3 py-1.5 text-sm rounded border border-indigo-300 dark:border-indigo-600 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-800">
                     {{ showManager ? 'Close manager' : 'Manage promotions' }}
                 </button>
+                <button @click="toggleTopReadsManager"
+                        class="px-3 py-1.5 text-sm rounded border border-indigo-300 dark:border-indigo-600 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-800">
+                    {{ showTopReadsManager ? 'Close Recommended Reads' : 'Manage Recommended Reads' }}
+                </button>
             </div>
+        </div>
+
+        <!-- Admin Recommended Reads manager -->
+        <div v-if="isAdmin && showTopReadsManager"
+             class="mb-8 bg-white dark:bg-gray-800 rounded-lg shadow border dark:border-gray-700 overflow-hidden">
+            <div class="p-4 border-b dark:border-gray-700">
+                <h2 class="font-bold text-gray-800 dark:text-white">Recommended Reads</h2>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Recommended links shown to everyone in the
+                    sidebar.</p>
+            </div>
+            <form @submit.prevent="submitLink"
+                  class="p-4 grid grid-cols-1 md:grid-cols-3 gap-3 border-b dark:border-gray-700">
+                <input v-model.trim="linkForm.title"
+                       type="text"
+                       required
+                       maxlength="200"
+                       placeholder="Title"
+                       class="px-3 py-2 text-sm rounded border dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                <input v-model.trim="linkForm.url"
+                       type="url"
+                       required
+                       maxlength="2048"
+                       placeholder="https://example.com/article"
+                       class="px-3 py-2 text-sm rounded border dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                <input v-model.trim="linkForm.description"
+                       type="text"
+                       maxlength="500"
+                       placeholder="Short description (optional)"
+                       class="px-3 py-2 text-sm rounded border dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                <div class="md:col-span-3 flex justify-end">
+                    <button type="submit"
+                            :disabled="savingLink"
+                            class="px-3 py-1.5 text-sm rounded bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50">
+                        {{ savingLink ? 'Adding…' : '+ Add link' }}
+                    </button>
+                </div>
+            </form>
+            <AppLoader v-if="loadingTopReads"
+                       center
+                       size="md"
+                       class="py-6" />
+            <div v-else-if="topReads.length === 0"
+                 class="p-6 text-center text-gray-500 dark:text-gray-400">
+                No links yet. Add one above to show it in the sidebar.
+            </div>
+            <ul v-else
+                class="divide-y dark:divide-gray-700">
+                <li v-for="link in topReads"
+                    :key="link.id"
+                    class="p-3 flex items-center justify-between gap-4">
+                    <div class="min-w-0">
+                        <a v-if="safeLink(link.url)"
+                           :href="link.url"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="block text-sm font-medium text-gray-800 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 truncate">{{
+                            link.title }} <span class="text-xs text-gray-400">↗</span></a>
+                        <p v-else
+                           class="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{{ link.title }}</p>
+                        <a v-if="safeLink(link.url)"
+                           :href="link.url"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline truncate block">{{
+                            link.url }}</a>
+                    </div>
+                    <button @click="deletingLink = link"
+                            class="text-sm text-red-600 dark:text-red-400 hover:underline whitespace-nowrap">Delete</button>
+                </li>
+            </ul>
         </div>
 
         <!-- Admin manager panel -->
@@ -293,6 +367,11 @@
                       :message="`Delete “${deleting?.title || ''}”? This cannot be undone.`"
                       @confirm="confirmDelete"
                       @cancel="deleting = null" />
+
+        <ConfirmModal :is-open="!!deletingLink"
+                      :message="`Remove “${deletingLink?.title || ''}” from Recommended Reads?`"
+                      @confirm="confirmDeleteLink"
+                      @cancel="deletingLink = null" />
     </div>
 </template>
 
@@ -305,9 +384,18 @@ import AppImage from '../components/AppImage.vue'
 import AppLoader from '../components/AppLoader.vue'
 import ConfirmModal from '../components/ConfirmModal.vue'
 import PromotionFormModal from '../components/PromotionFormModal.vue'
+import { useTopReads } from '../composables/useTopReads'
 
 const { user, getToken } = useAuth()
 const { showToast } = useToast()
+const {
+    links: topReads,
+    loading: loadingTopReads,
+    ensureLoaded: ensureTopReadsLoaded,
+    addLink,
+    deleteLink,
+    safeLink
+} = useTopReads()
 
 const isAdmin = computed(() => user.value?.is_admin === true)
 
@@ -335,6 +423,12 @@ const managerPromotions = ref([])
 const showForm = ref(false)
 const editing = ref(null)
 const deleting = ref(null)
+
+// Recommended Reads admin state
+const showTopReadsManager = ref(false)
+const savingLink = ref(false)
+const deletingLink = ref(null)
+const linkForm = ref({ title: '', url: '', description: '' })
 
 const typeMeta = {
     staff_pick: { label: 'Staff Pick', class: 'bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-200' },
@@ -371,8 +465,6 @@ const isEmptyHub = computed(
         bestsellers.value.length === 0 &&
         !loadingHub.value
 )
-
-const safeLink = (url) => !!url && /^https?:\/\//i.test(url)
 
 const ctr = (p) => {
     if (!p.impressions) return '—'
@@ -502,4 +594,39 @@ onMounted(() => {
     loadPromotions()
     loadBestsellers()
 })
+
+// --- Recommended Reads admin actions ---
+const toggleTopReadsManager = () => {
+    showTopReadsManager.value = !showTopReadsManager.value
+    if (showTopReadsManager.value) ensureTopReadsLoaded()
+}
+
+const submitLink = async () => {
+    if (!safeLink(linkForm.value.url)) {
+        showToast('Link must start with http:// or https://', 'error')
+        return
+    }
+    savingLink.value = true
+    try {
+        await addLink({ ...linkForm.value }, await getToken())
+        linkForm.value = { title: '', url: '', description: '' }
+        showToast('Link added to Recommended Reads', 'success')
+    } catch (e) {
+        showToast(e.message || 'Could not add link', 'error')
+    } finally {
+        savingLink.value = false
+    }
+}
+
+const confirmDeleteLink = async () => {
+    const link = deletingLink.value
+    deletingLink.value = null
+    if (!link) return
+    try {
+        await deleteLink(link.id, await getToken())
+        showToast('Link removed', 'success')
+    } catch (e) {
+        showToast(e.message || 'Could not delete link', 'error')
+    }
+}
 </script>
