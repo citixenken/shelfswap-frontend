@@ -46,7 +46,7 @@
                         <input @change="handleFileChange"
                                id="avatar"
                                type="file"
-                               accept="image/*"
+                               accept="image/jpeg,image/png,image/gif,image/webp"
                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 dark:bg-gray-700 dark:border-gray-600 leading-tight focus:outline-none focus:shadow-outline">
                         <button v-if="user.avatar_path"
                                 type="button"

@@ -74,8 +74,8 @@ const submitForm = async () => {
             form.value = { name: '', email: '', subject: '', message: '' }
             router.push('/books')
         } else {
-            const data = await res.json()
-            showToast(data.error || 'Failed to send message', 'error')
+            const msg = (await res.text().catch(() => '')).trim()
+            showToast(msg || 'Failed to send message', 'error')
         }
     } catch (e) {
         showToast('An error occurred', 'error')

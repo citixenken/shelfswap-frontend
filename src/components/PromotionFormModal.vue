@@ -130,7 +130,7 @@
                                       alt="Promotion image" />
                         </div>
                         <input type="file"
-                               accept="image/*"
+                               accept="image/jpeg,image/png,image/gif,image/webp"
                                @change="handleFileUpload"
                                class="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 hover:file:cursor-pointer" />
                     </div>
@@ -313,7 +313,10 @@ const uploadImage = async () => {
             headers: { Authorization: `Bearer ${token}` },
             body: fd
         })
-        if (!res.ok) throw new Error('Image upload failed')
+        if (!res.ok) {
+            const msg = (await res.text().catch(() => '')).trim()
+            throw new Error(msg || 'Image upload failed')
+        }
         const data = await res.json()
         return data.image_path
     } finally {

@@ -39,7 +39,7 @@
                 <label class="block text-sm font-medium text-gray-700">Cover Image</label>
                 <input type="file"
                        @change="handleFileUpload"
-                       accept="image/*"
+                       accept="image/jpeg,image/png,image/gif,image/webp"
                        :required="!isEdit"
                        class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 hover:file:cursor-pointer" />
                 <p v-if="isEdit && imagePath"
@@ -134,22 +134,20 @@ const uploadImage = async () => {
     const formData = new FormData()
     formData.append('image', selectedFile.value)
 
-    try {
-        const token = await getToken()
-        const res = await fetch(`${API_BASE_URL}/upload`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            },
-            body: formData
-        })
-        if (!res.ok) throw new Error('Upload failed')
-        const data = await res.json()
-        return data.image_path
-    } catch (e) {
-        console.error(e)
-        return null
+    const token = await getToken()
+    const res = await fetch(`${API_BASE_URL}/upload`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        },
+        body: formData
+    })
+    if (!res.ok) {
+        const msg = (await res.text().catch(() => '')).trim()
+        throw new Error(msg || 'Image upload failed.')
     }
+    const data = await res.json()
+    return data.image_path
 }
 
 const submitBook = async () => {
@@ -177,9 +175,13 @@ const submitBook = async () => {
     try {
         let uploadedPath = imagePath.value
         if (selectedFile.value) {
-            const path = await uploadImage()
-            if (path) {
-                uploadedPath = path
+            try {
+                uploadedPath = await uploadImage()
+            } catch (e) {
+                message.value = e.message
+                isSuccess.value = false
+                isSubmitting.value = false
+                return
             }
         }
 

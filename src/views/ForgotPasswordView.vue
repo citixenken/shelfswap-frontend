@@ -64,13 +64,13 @@ const handleSubmit = async () => {
             body: JSON.stringify({ email: email.value })
         })
 
-        const data = await res.json()
-
         if (res.ok) {
+            const data = await res.json()
             message.value = data.message
             email.value = ''
         } else {
-            error.value = data.error || 'Something went wrong'
+            const msg = (await res.text().catch(() => '')).trim()
+            error.value = msg || 'Something went wrong'
         }
     } catch (e) {
         error.value = 'Network error'
