@@ -74,7 +74,7 @@
             </router-link>
             <router-link v-if="!isSignedIn"
                          to="/register"
-                         class="cta-button-outline border-1 border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-gray-800 text-lg font-semibold py-4 px-10 rounded-full shadow-lg transform transition hover:scale-105 duration-200">
+                         class="cta-button-outline border-2 border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-gray-800 text-lg font-semibold py-4 px-10 rounded-full shadow-lg transform transition hover:scale-105 duration-200">
                 Join ShelfSwap
             </router-link>
         </div>
