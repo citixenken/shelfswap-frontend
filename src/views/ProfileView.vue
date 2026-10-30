@@ -95,7 +95,10 @@
                            class="flex-1 min-w-0 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white text-sm" />
                     <button type="submit"
                             :disabled="invitingEmails"
-                            class="bg-gray-800 dark:bg-gray-600 hover:bg-gray-900 dark:hover:bg-gray-500 text-white px-4 py-2 rounded text-sm font-medium whitespace-nowrap disabled:opacity-60 transition-colors">
+                            :class="hasValidInviteEmails
+                                ? 'bg-green-600 hover:bg-green-700'
+                                : 'bg-gray-800 dark:bg-gray-600 hover:bg-gray-900 dark:hover:bg-gray-500'"
+                            class="text-white px-4 py-2 rounded text-sm font-medium whitespace-nowrap disabled:opacity-60 transition-colors">
                         {{ invitingEmails ? 'Sending…' : 'Email invites' }}
                     </button>
                 </form>
@@ -159,6 +162,14 @@ const followingCount = ref(0)
 const followersCount = ref(0)
 const inviteEmails = ref('')
 const invitingEmails = ref(false)
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+// True only when every comma-separated entry is a well-formed email.
+const hasValidInviteEmails = computed(() => {
+    const emails = inviteEmails.value.split(',').map(e => e.trim()).filter(Boolean)
+    return emails.length > 0 && emails.every(e => EMAIL_PATTERN.test(e))
+})
 
 const userInitial = computed(() => {
     if (user.value && user.value.email) {
